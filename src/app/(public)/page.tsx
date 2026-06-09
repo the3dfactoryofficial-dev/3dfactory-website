@@ -10,6 +10,7 @@ import { FAQ } from "@/components/home/FAQ"
 import { InstagramTrust } from "@/components/home/InstagramTrust"
 import { TrustSection } from "@/components/home/TrustSection"
 import { CTABanner } from "@/components/home/CTABanner"
+import { faqItems } from "@/data/faq"
 
 export const revalidate = 3600
 
@@ -20,6 +21,19 @@ export const metadata = generateMetadata({
   path: "/",
 })
 
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqItems.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  })),
+}
+
 export default async function Home() {
   const [featured, testimonials] = await Promise.all([
     getFeaturedProducts(),
@@ -27,6 +41,10 @@ export default async function Home() {
   ])
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <Hero />
       <FeaturedProducts featured={featured} />
       <WhyChooseUs />

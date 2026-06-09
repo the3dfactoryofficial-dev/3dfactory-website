@@ -41,10 +41,10 @@ export const CategoryFilter = memo(function CategoryFilter({ active, onChange, c
             key={cat.value}
             onClick={() => onChange(cat.value === "all" ? null : cat.value)}
             className={cn(
-              "inline-flex items-center gap-1.5 shrink-0 px-3.5 py-2 text-[13px] font-medium rounded-lg border transition-all duration-150 cursor-pointer select-none whitespace-nowrap",
+              "inline-flex items-center gap-1.5 shrink-0 px-3 py-1.5 text-[13px] font-medium rounded-lg border transition-colors duration-150 cursor-pointer select-none whitespace-nowrap",
               isActive
                 ? "bg-primary text-primary-foreground border-primary"
-                : "bg-card text-muted-foreground border-border hover:text-foreground hover:border-zinc-600"
+                : "bg-zinc-900 text-muted-foreground border-zinc-800 hover:text-foreground hover:border-zinc-600"
             )}
           >
             <Icon className="w-3.5 h-3.5" />

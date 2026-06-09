@@ -9,6 +9,7 @@ import { getActiveCategoriesAction } from "@/actions/categories"
 import type { Product } from "@/types"
 import { SITE } from "@/lib/constants"
 import { cn } from "@/lib/utils"
+import { trackWhatsAppClick } from "@/lib/analytics"
 
 export const CatalogClient = memo(function CatalogClient({
   products,
@@ -72,18 +73,18 @@ export const CatalogClient = memo(function CatalogClient({
 
   return (
     <>
-      <section className="pt-32 pb-16 md:pt-36 md:pb-20">
+      <section className="pt-28 pb-12 md:pt-36 md:pb-20">
         <div className="container-main">
           <div className="max-w-2xl mx-auto text-center">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
               Our Collection
             </h1>
-            <p className="mt-4 text-base sm:text-lg text-muted max-w-lg mx-auto leading-relaxed">
+            <p className="mt-3 text-sm sm:text-base text-muted max-w-lg mx-auto leading-relaxed">
               Every piece is produced in-house — from spiritual decor and
               cosplay collectibles to precision engineering prototypes.
             </p>
 
-            <div className="mt-10">
+            <div className="mt-6">
               <CategoryFilter
                 active={activeCategory}
                 onChange={handleCategoryChange}
@@ -132,6 +133,7 @@ export const CatalogClient = memo(function CatalogClient({
               href={`https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent("Hi! I'd like to discuss a custom 3D printing project.")}`}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackWhatsAppClick("catalog_cta")}
               className={cn(
                 "inline-flex items-center justify-center gap-2.5 h-13 px-8 text-base font-medium rounded-xl mt-6",
                 "bg-primary text-primary-foreground hover:bg-primary-hover active:scale-[0.97]",

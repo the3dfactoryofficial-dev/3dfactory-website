@@ -6,6 +6,7 @@ import { MessageCircle, Package, Sparkles, Truck, Clock } from "lucide-react"
 import Link from "next/link"
 import { SITE } from "@/lib/constants"
 import { cn } from "@/lib/utils"
+import { trackWhatsAppClick } from "@/lib/analytics"
 
 const stats = [
   { icon: Package, label: "500+ Creations Delivered" },
@@ -93,6 +94,7 @@ export function Hero() {
               href={`https://wa.me/${SITE.whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackWhatsAppClick("hero")}
               className={cn(
                 "inline-flex items-center justify-center gap-2.5 h-13 px-8 text-base font-medium rounded-xl",
                 "bg-primary text-primary-foreground hover:bg-primary-hover active:scale-[0.97]",

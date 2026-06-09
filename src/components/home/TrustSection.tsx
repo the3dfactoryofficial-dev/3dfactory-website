@@ -1,4 +1,4 @@
-import { Building2, PaintBucket, ShoppingBag } from "lucide-react"
+import { Building2, PaintBucket, ShoppingBag, Check } from "lucide-react"
 import { Section } from "@/components/ui/Section"
 import { Heading } from "@/components/ui/Heading"
 
@@ -33,6 +33,13 @@ const audiences = [
   },
 ]
 
+const trustSignals = [
+  "Custom Manufacturing",
+  "Bulk Production",
+  "Engineering Prototypes",
+  "Made in India",
+]
+
 export function TrustSection() {
   return (
     <Section id="trust" dark className="relative overflow-hidden">
@@ -42,13 +49,22 @@ export function TrustSection() {
         subtitle="Whether you need a one-of-a-kind custom piece or a batch of 500, we have the craft and experience to deliver."
       />
 
-      <div className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2">
+        {trustSignals.map((signal) => (
+          <span key={signal} className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+            <Check className="w-4 h-4 text-primary" />
+            {signal}
+          </span>
+        ))}
+      </div>
+
+      <div className="mt-10 md:mt-14 grid grid-cols-1 md:grid-cols-2 gap-6">
         {audiences.map((audience) => {
           const Icon = audience.icon
           return (
             <div
               key={audience.title}
-              className="group relative rounded-2xl bg-zinc-900/50 border border-border p-6 md:p-8 hover:bg-zinc-800/50 hover:border-primary/30 active:border-primary/30 active:bg-zinc-800/50 transition-all duration-200 select-none"
+              className="group relative rounded-2xl bg-zinc-900 border border-zinc-800 p-6 md:p-8 hover:border-primary/30 active:border-primary/30 transition-colors duration-200 select-none"
             >
               <div className="flex items-start gap-4">
                 <div className="shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary">
@@ -65,7 +81,7 @@ export function TrustSection() {
                     {audience.features.map((f) => (
                       <li
                         key={f}
-                        className="inline-flex items-center px-2.5 py-1 text-[11px] font-medium rounded-md bg-zinc-800 text-muted-foreground border border-border/50"
+                        className="inline-flex items-center px-2.5 py-1 text-[11px] font-medium rounded-md bg-zinc-800 text-muted-foreground border border-zinc-700"
                       >
                         {f}
                       </li>

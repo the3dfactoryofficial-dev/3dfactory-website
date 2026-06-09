@@ -6,6 +6,7 @@ import { SITE } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 import { createInquiryAction } from "@/actions/inquiries"
 import { uploadToCloudinary } from "@/lib/cloudinary-upload"
+import { trackInquirySubmit, trackWhatsAppClick } from "@/lib/analytics"
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/ui/scroll-lock"
 
 interface QuickInquiryProps {
@@ -96,6 +97,8 @@ export function QuickInquiry({
     )
 
     window.open(`https://wa.me/${SITE.whatsapp}?text=${text}`, "_blank")
+    trackInquirySubmit(source)
+    trackWhatsAppClick(`inquiry_${source}`)
     setSubmitted(true)
     setSaving(false)
   }

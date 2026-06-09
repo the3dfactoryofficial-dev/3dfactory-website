@@ -5,6 +5,7 @@ import { MessageCircle } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { SITE } from "@/lib/constants"
 import { cn } from "@/lib/utils"
+import { trackWhatsAppClick } from "@/lib/analytics"
 
 const projectTypes = [
   "Custom Design",
@@ -38,6 +39,7 @@ export function InquiryForm() {
     )
 
     window.open(`https://wa.me/${SITE.whatsapp}?text=${text}`, "_blank")
+    trackWhatsAppClick("contact_form")
   }
 
   return (

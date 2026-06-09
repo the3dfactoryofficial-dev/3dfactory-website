@@ -22,6 +22,17 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+
+function useIsDesktop(breakpoint = 768) {
+  const [isDesktop, setIsDesktop] = useState(true)
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= breakpoint)
+    check()
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
+  }, [breakpoint])
+  return isDesktop
+}
 import {
   getProductsAction,
   deleteProductAction,
@@ -287,6 +298,7 @@ export default function AdminProductsPage() {
   const [categoryMap, setCategoryMap] = useState<Record<string, string>>({})
   const [activeCategoryIds, setActiveCategoryIds] = useState<Set<string>>(new Set())
   const reloadTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isDesktop = useIsDesktop()
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -462,68 +474,68 @@ export default function AdminProductsPage() {
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
           >
-            {/* Desktop table */}
-            <div className="hidden md:block rounded-2xl border border-border overflow-hidden">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-surface border-b border-border">
-                    <th className="w-10 px-2 py-4"></th>
-                    <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Product
-                    </th>
-                    <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Price
-                    </th>
-                    <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="text-right px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
+            {isDesktop ? (
+              <div className="hidden md:block rounded-2xl border border-border overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-surface border-b border-border">
+                      <th className="w-10 px-2 py-4"></th>
+                      <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Product
+                      </th>
+                      <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Category
+                      </th>
+                      <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Price
+                      </th>
+                      <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="text-right px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <SortableContext items={products.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+                    <tbody>
+                      {products.map((product) => (
+                        <SortableProductRow
+                          key={product.id}
+                          product={product}
+                          onToggleFeatured={handleToggleFeatured}
+                          onEdit={handleEdit}
+                          onDelete={handleDelete}
+                          isDeleting={deleting === product.id}
+                          categoryMap={categoryMap}
+                          activeCategoryIds={activeCategoryIds}
+                        />
+                      ))}
+                    </tbody>
+                  </SortableContext>
+                </table>
+              </div>
+            ) : (
+              <div className="md:hidden space-y-3">
                 <SortableContext items={products.map((p) => p.id)} strategy={verticalListSortingStrategy}>
-                  <tbody>
-                    {products.map((product) => (
-                      <SortableProductRow
-                        key={product.id}
-                        product={product}
-                        onToggleFeatured={handleToggleFeatured}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        isDeleting={deleting === product.id}
-                        categoryMap={categoryMap}
-                        activeCategoryIds={activeCategoryIds}
-                      />
-                    ))}
-                  </tbody>
+                  {products.map((product) => (
+                    <SortableProductCard
+                      key={product.id}
+                      product={product}
+                      onToggleFeatured={handleToggleFeatured}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      isDeleting={deleting === product.id}
+                      categoryMap={categoryMap}
+                      activeCategoryIds={activeCategoryIds}
+                    />
+                  ))}
                 </SortableContext>
-              </table>
-            </div>
-
-            {/* Mobile cards */}
-            <div className="md:hidden space-y-3">
-              <SortableContext items={products.map((p) => p.id)} strategy={verticalListSortingStrategy}>
-                {products.map((product) => (
-                  <SortableProductCard
-                    key={product.id}
-                    product={product}
-                    onToggleFeatured={handleToggleFeatured}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    isDeleting={deleting === product.id}
-                    categoryMap={categoryMap}
-                    activeCategoryIds={activeCategoryIds}
-                  />
-                ))}
-              </SortableContext>
-            </div>
+              </div>
+            )}
           </DndContext>
         )}
       </div>

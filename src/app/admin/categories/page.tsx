@@ -18,6 +18,17 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+
+function useIsDesktop(breakpoint = 768) {
+  const [isDesktop, setIsDesktop] = useState(true)
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= breakpoint)
+    check()
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
+  }, [breakpoint])
+  return isDesktop
+}
 import {
   getCategoriesAction,
   createCategoryAction,
@@ -204,6 +215,7 @@ export default function AdminCategoriesPage() {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const reloadTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isDesktop = useIsDesktop()
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -427,54 +439,55 @@ export default function AdminCategoriesPage() {
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
             >
-              <div className="hidden md:block rounded-2xl border border-border overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-surface border-b border-border">
-                      <th className="w-10 px-2 py-4"></th>
-                      <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Name</th>
-                      <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Slug</th>
-                      <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Description</th>
-                      <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
-                      <th className="text-right px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
+              {isDesktop ? (
+                <div className="hidden md:block rounded-2xl border border-border overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-surface border-b border-border">
+                        <th className="w-10 px-2 py-4"></th>
+                        <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Name</th>
+                        <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Slug</th>
+                        <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Description</th>
+                        <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                        <th className="text-right px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <SortableContext items={categories.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+                      <tbody>
+                        {categories.map((cat, index) => (
+                          <SortableItem
+                            key={cat.id}
+                            cat={cat}
+                            index={index}
+                            total={categories.length}
+                            onToggle={handleToggleActive}
+                            onDelete={handleDelete}
+                            onEdit={(c) => { setEditing(c); setShowForm(true) }}
+                            isDeleting={deleting === cat.id}
+                          />
+                        ))}
+                      </tbody>
+                    </SortableContext>
+                  </table>
+                </div>
+              ) : (
+                <div className="md:hidden space-y-3">
                   <SortableContext items={categories.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-                    <tbody>
-                      {categories.map((cat, index) => (
-                        <SortableItem
-                          key={cat.id}
-                          cat={cat}
-                          index={index}
-                          total={categories.length}
-                          onToggle={handleToggleActive}
-                          onDelete={handleDelete}
-                          onEdit={(c) => { setEditing(c); setShowForm(true) }}
-                          isDeleting={deleting === cat.id}
-                        />
-                      ))}
-                    </tbody>
+                    {categories.map((cat, index) => (
+                      <SortableCard
+                        key={cat.id}
+                        cat={cat}
+                        index={index}
+                        total={categories.length}
+                        onToggle={handleToggleActive}
+                        onDelete={handleDelete}
+                        onEdit={(c) => { setEditing(c); setShowForm(true) }}
+                        isDeleting={deleting === cat.id}
+                      />
+                    ))}
                   </SortableContext>
-                </table>
-              </div>
-
-              {/* Mobile cards */}
-              <div className="md:hidden space-y-3">
-                <SortableContext items={categories.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-                  {categories.map((cat, index) => (
-                    <SortableCard
-                      key={cat.id}
-                      cat={cat}
-                      index={index}
-                      total={categories.length}
-                      onToggle={handleToggleActive}
-                      onDelete={handleDelete}
-                      onEdit={(c) => { setEditing(c); setShowForm(true) }}
-                      isDeleting={deleting === cat.id}
-                    />
-                  ))}
-                </SortableContext>
-              </div>
+                </div>
+              )}
             </DndContext>
           </>
         )}

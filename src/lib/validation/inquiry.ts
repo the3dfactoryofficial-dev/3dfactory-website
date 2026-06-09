@@ -43,7 +43,16 @@ export const CreateInquirySchema = z.object({
     .string()
     .min(1, "Source page is required")
     .max(200, "Source page must be under 200 characters"),
-  attachments: z.array(z.string()).optional().default([]),
+  source: z
+    .string()
+    .min(1, "Source is required")
+    .max(50, "Source must be under 50 characters")
+    .optional()
+    .default("unknown"),
+  attachments: z.array(z.string().url("Invalid attachment URL").refine(
+    (v) => v.startsWith("https://"),
+    { message: "Attachment URL must use HTTPS" }
+  )).optional().default([]),
 })
 
 export const UpdateInquiryStatusSchema = z.object({

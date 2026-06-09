@@ -1,0 +1,19 @@
+[
+  {
+    "id": "e2e-1779898279093",
+    "name": "E2E Test",
+    "email": "e2e@test.com",
+    "phone": "+911234567890",
+    "product": "Test Product",
+    "category": "test",
+    "quantity": 1,
+    "preferred_size": "",
+    "customizable": 0,
+    "message": "E2E test",
+    "source_page": "test",
+    "status": "new",
+    "created_at": "2026-05-27T16:11:19.093Z",
+    "attachments": "[]",
+    "user_id": null
+  }
+]

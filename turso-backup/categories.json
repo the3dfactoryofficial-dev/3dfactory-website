@@ -1,0 +1,38 @@
+[
+  {
+    "id": "2ebc0c69-bdd9-41a5-8583-ab87880c3c54",
+    "name": "Prototypes",
+    "slug": "prototypes",
+    "description": "",
+    "sort_order": 3,
+    "created_at": "(datetime('now'))",
+    "is_active": 1
+  },
+  {
+    "id": "a5674b5a-18fb-4889-bda9-05f7a913f92d",
+    "name": "Custom Orders",
+    "slug": "custom",
+    "description": "",
+    "sort_order": 1,
+    "created_at": "(datetime('now'))",
+    "is_active": 1
+  },
+  {
+    "id": "d2224279-cd97-47ce-8bfe-ed254e575476",
+    "name": "Cosplay & Props",
+    "slug": "cosplay",
+    "description": "",
+    "sort_order": 0,
+    "created_at": "(datetime('now'))",
+    "is_active": 1
+  },
+  {
+    "id": "ef531908-b64b-4eca-8f79-05553f35c090",
+    "name": "Spiritual Decor",
+    "slug": "spiritual-decor",
+    "description": "",
+    "sort_order": 2,
+    "created_at": "(datetime('now'))",
+    "is_active": 1
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "users": {
+    "rowCount": 4,
+    "exportedAt": "2026-06-09T11:37:24.059Z"
+  },
+  "categories": {
+    "rowCount": 4,
+    "exportedAt": "2026-06-09T11:37:24.075Z"
+  },
+  "products": {
+    "rowCount": 11,
+    "exportedAt": "2026-06-09T11:37:24.111Z"
+  },
+  "product_images": {
+    "rowCount": 10,
+    "exportedAt": "2026-06-09T11:37:24.124Z"
+  },
+  "product_videos": {
+    "rowCount": 0,
+    "exportedAt": "2026-06-09T11:37:24.135Z"
+  },
+  "testimonials": {
+    "rowCount": 0,
+    "exportedAt": "2026-06-09T11:37:24.154Z"
+  },
+  "inquiries": {
+    "rowCount": 1,
+    "exportedAt": "2026-06-09T11:37:24.170Z"
+  }
+}

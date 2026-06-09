@@ -24,6 +24,7 @@ function toInquiry(row: typeof inquiries.$inferSelect): Inquiry {
     customizable: row.customizable,
     message: row.message,
     sourcePage: row.sourcePage,
+    source: row.source,
     attachments,
     status: row.status,
     userId: row.userId,
@@ -51,11 +52,12 @@ export async function createInquiryQuery(
         customizable: input.customizable,
         message: input.message ?? "",
         sourcePage: input.sourcePage,
+        source: input.source ?? "unknown",
         attachments: JSON.stringify(input.attachments ?? []),
         status: "new",
         createdAt: now,
       })
-    return { success: true, data: toInquiry({ id, ...input, preferredSize: input.preferredSize ?? "", message: input.message ?? "", attachments: JSON.stringify(input.attachments ?? []), status: "new" as const, userId: null, createdAt: now }) }
+    return { success: true, data: toInquiry({ id, ...input, source: input.source ?? "unknown", preferredSize: input.preferredSize ?? "", message: input.message ?? "", attachments: JSON.stringify(input.attachments ?? []), status: "new" as const, userId: null, createdAt: now }) }
   } catch (err) {
     return {
       success: false,

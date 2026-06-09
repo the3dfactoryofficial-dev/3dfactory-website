@@ -12,6 +12,7 @@ interface QuickInquiryProps {
   productName: string
   productCategory?: string
   sourcePage?: string
+  source?: string
   onClose: () => void
 }
 
@@ -19,6 +20,7 @@ export function QuickInquiry({
   productName,
   productCategory = "",
   sourcePage = "unknown",
+  source = "unknown",
   onClose,
 }: QuickInquiryProps) {
   const [name, setName] = useState("")
@@ -63,6 +65,8 @@ export function QuickInquiry({
     formData.set("customizable", needsCustomization === "yes" ? "true" : "false")
     formData.set("message", customReq)
     formData.set("sourcePage", sourcePage)
+    formData.set("source", source)
+    formData.set("website", "") // honeypot — must be empty
     if (attachments.length > 0) {
       formData.set("attachments", JSON.stringify(attachments))
     }
@@ -160,6 +164,10 @@ export function QuickInquiry({
             </p>
 
             <div className="space-y-4">
+              <div aria-hidden="true" className="absolute opacity-0 pointer-events-none top-0 left-0 h-0 w-0" style={{ position: "absolute", left: "-9999px" }}>
+                <label htmlFor="website">Website</label>
+                <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
+              </div>
               <div>
                 <label htmlFor="inq-name" className="block text-sm font-medium text-foreground mb-1.5">
                   Name <span className="text-red-400">*</span>

@@ -16,6 +16,32 @@ import { ChevronDown, Clock, Search, ArrowUpDown } from "lucide-react"
 
 const statusOptions: InquiryStatus[] = ["new", "contacted", "quoted", "completed"]
 
+const SOURCE_LABELS: Record<string, string> = {
+  product_card: "Card",
+  product_page: "Product Page",
+  quick_inquiry: "Quick Inquiry",
+  contact_page: "Contact Page",
+  unknown: "Unknown",
+}
+
+function SourceBadge({ source }: { source: string }) {
+  const label = SOURCE_LABELS[source] ?? source
+  return (
+    <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-md bg-zinc-800 text-muted-foreground border border-border/50">
+      {label}
+    </span>
+  )
+}
+
+function safeUrl(url: string): string {
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === "https:" ? url : "#"
+  } catch {
+    return "#"
+  }
+}
+
 function formatDate(iso: string): string {
   try {
     const d = new Date(iso)
@@ -79,6 +105,7 @@ export default function AdminInquiriesPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<InquiryStatus | "all">("all")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
+  const [sourceFilter, setSourceFilter] = useState<string>("all")
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest")
 
   const loadInquiries = async () => {
@@ -122,6 +149,11 @@ export default function AdminInquiriesPage() {
     return Array.from(cats)
   }, [inquiries])
 
+  const allSources = useMemo(() => {
+    const srcs = new Set(inquiries.map((i) => i.source))
+    return Array.from(srcs)
+  }, [inquiries])
+
   const filtered = useMemo(() => {
     let result = [...inquiries]
 
@@ -132,7 +164,8 @@ export default function AdminInquiriesPage() {
         (i) =>
           i.name.toLowerCase().includes(q) ||
           i.phone.toLowerCase().includes(q) ||
-          i.product.toLowerCase().includes(q)
+          i.product.toLowerCase().includes(q) ||
+          i.source.toLowerCase().includes(q)
       )
     }
 
@@ -146,6 +179,11 @@ export default function AdminInquiriesPage() {
       result = result.filter((i) => i.category === categoryFilter)
     }
 
+    // Source filter
+    if (sourceFilter !== "all") {
+      result = result.filter((i) => i.source === sourceFilter)
+    }
+
     // Sort
     result.sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime()
@@ -154,7 +192,7 @@ export default function AdminInquiriesPage() {
     })
 
     return result
-  }, [inquiries, searchQuery, statusFilter, categoryFilter, sortOrder])
+  }, [inquiries, searchQuery, statusFilter, categoryFilter, sourceFilter, sortOrder])
 
   return (
     <div className="min-h-screen bg-background pb-16">
@@ -183,7 +221,7 @@ export default function AdminInquiriesPage() {
         </div>
 
         {/* Filters */}
-        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 pointer-events-none" />
             <input
@@ -212,6 +250,16 @@ export default function AdminInquiriesPage() {
             <option value="all">All Categories</option>
             {allCategories.map((c) => (
               <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          <select
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value)}
+            className="h-11 px-3.5 text-sm bg-surface border border-border rounded-xl text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
+          >
+            <option value="all">All Sources</option>
+            {allSources.map((s) => (
+              <option key={s} value={s}>{SOURCE_LABELS[s] ?? s}</option>
             ))}
           </select>
           <button
@@ -268,6 +316,7 @@ export default function AdminInquiriesPage() {
                     <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Contact</th>
                     <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Product</th>
                     <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Qty</th>
+                    <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Source</th>
                     <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Files</th>
                     <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
                     <th className="text-left px-5 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</th>
@@ -292,12 +341,15 @@ export default function AdminInquiriesPage() {
                       </td>
                       <td className="px-5 py-4 text-foreground">{inq.quantity}</td>
                       <td className="px-5 py-4">
+                        <SourceBadge source={inq.source} />
+                      </td>
+                      <td className="px-5 py-4">
                         {inq.attachments && inq.attachments.length > 0 ? (
                           <div className="flex gap-1.5">
                             {inq.attachments.map((url, i) => (
                               <a
                                 key={url}
-                                href={url}
+                                href={safeUrl(url)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium rounded-md bg-zinc-800 text-muted-foreground hover:text-foreground hover:bg-zinc-700 transition-colors"
@@ -336,13 +388,16 @@ export default function AdminInquiriesPage() {
                   <div className="space-y-1.5 text-xs text-muted-foreground">
                     <p><span className="text-foreground font-medium">{inq.product}</span> — {inq.quantity} unit{inq.quantity !== 1 ? "s" : ""}</p>
                     <p>{inq.category}</p>
+                    <p className="flex items-center gap-1.5">
+                      <SourceBadge source={inq.source} />
+                    </p>
                     {inq.preferredSize && <p>Size: {inq.preferredSize}</p>}
                     {inq.customizable && <p>Needs customization</p>}
                     {inq.message && <p className="mt-2 text-muted-foreground/60 italic line-clamp-2">&ldquo;{inq.message}&rdquo;</p>}
                     {inq.attachments && inq.attachments.length > 0 && (
                       <div className="flex gap-1.5 mt-1">
-                        {inq.attachments.map((url, i) => (
-                          <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-lg bg-zinc-800 text-muted-foreground hover:text-foreground hover:bg-zinc-700 transition-colors">
+                          {inq.attachments.map((url, i) => (
+                          <a key={url} href={safeUrl(url)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-lg bg-zinc-800 text-muted-foreground hover:text-foreground hover:bg-zinc-700 transition-colors">
                             File {i + 1}
                           </a>
                         ))}

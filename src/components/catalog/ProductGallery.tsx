@@ -317,6 +317,7 @@ export function ProductGallery({ product, onClose }: ProductGalleryProps) {
           productName={product.title}
           productCategory={categoryLabel}
           sourcePage={product.slug}
+          source="product_page"
           onClose={() => setShowInquiry(false)}
         />
       )}

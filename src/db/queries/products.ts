@@ -231,10 +231,14 @@ export async function getProductsQuery(): Promise<
       .from(products)
       .orderBy(asc(products.sortOrder), desc(products.createdAt))
 
-    const allImages = await db
-      .select()
-      .from(productImages)
-      .orderBy(asc(productImages.sortOrder))
+    const productIds = rows.map((r) => r.id)
+    const allImages = productIds.length > 0
+      ? await db
+          .select()
+          .from(productImages)
+          .where(inArray(productImages.productId, productIds))
+          .orderBy(asc(productImages.sortOrder))
+      : []
 
     const imageMap = new Map<string, ProductImageRow[]>()
     for (const img of allImages) {
@@ -373,10 +377,14 @@ export async function getFeaturedProductsQuery(): Promise<
 
     const visible = rows.filter((p) => !p.categoryId || activeCategoryIds.has(p.categoryId))
 
-    const allImages = await db
-      .select()
-      .from(productImages)
-      .orderBy(asc(productImages.sortOrder))
+    const featuredIds = visible.map((r) => r.id)
+    const allImages = featuredIds.length > 0
+      ? await db
+          .select()
+          .from(productImages)
+          .where(inArray(productImages.productId, featuredIds))
+          .orderBy(asc(productImages.sortOrder))
+      : []
 
     const imageMap = new Map<string, ProductImageRow[]>()
     for (const img of allImages) {
@@ -431,10 +439,14 @@ export async function getProductsByCategoryQuery(
       )
       .orderBy(asc(products.sortOrder), desc(products.createdAt))
 
-    const allImages = await db
-      .select()
-      .from(productImages)
-      .orderBy(asc(productImages.sortOrder))
+    const productIds = rows.map((r) => r.id)
+    const allImages = productIds.length > 0
+      ? await db
+          .select()
+          .from(productImages)
+          .where(inArray(productImages.productId, productIds))
+          .orderBy(asc(productImages.sortOrder))
+      : []
 
     const imageMap = new Map<string, ProductImageRow[]>()
     for (const img of allImages) {

@@ -1,4 +1,3 @@
-export type { IInquiryService } from "./inquiry-service"
 export type {
   Inquiry,
   InquiryStatus,

@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation"
 import { getProductBySlug, getProductsByCategory, getProductVideos } from "@/data/products"
-import { SITE } from "@/lib/constants"
 import { siteUrl } from "@/lib/url"
-import { formatWhatsAppUrl } from "@/lib/utils"
 import { ProductPageGallery } from "@/components/catalog/ProductPageGallery"
 import { ProductCard } from "@/components/catalog/ProductCard"
+import { ProductPageCTA } from "@/components/catalog/ProductPageCTA"
 import { BackButton } from "@/components/ui/BackButton"
 import type { Metadata } from "next"
 
@@ -33,11 +32,13 @@ export async function generateMetadata({
       url: siteUrl(`/catalog/${slug}`),
       siteName: "3D Factory",
       type: "website",
+      images: product.featuredImage ? [{ url: product.featuredImage, width: 1200, height: 630 }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: product.featuredImage ? [product.featuredImage] : undefined,
     },
     alternates: {
       canonical: siteUrl(`/catalog/${slug}`),
@@ -67,7 +68,6 @@ export default async function ProductPage({
   const related = allInCategory.filter((p) => p.slug !== slug).slice(0, 4)
   const allImages = [product.featuredImage, ...(product.galleryImages ?? [])].filter(Boolean)
   const productVids = await getProductVideos(product.id)
-  const whatsappUrl = formatWhatsAppUrl(SITE.whatsapp, product.title)
 
   const productionLabel = (
     {
@@ -215,27 +215,11 @@ export default async function ProductPage({
                 )}
 
                 <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2.5 h-13 px-8 text-base font-medium rounded-xl bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-[0.97] shadow-lg shadow-[#25D366]/20 transition-all duration-200"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                    </svg>
-                    <span>Get This Custom Made</span>
-                  </a>
+                  <ProductPageCTA
+                    productName={product.title}
+                    productSlug={slug}
+                    categoryLabel={product.category.replace("-", " ")}
+                  />
                   <a
                     href={`/catalog?category=${product.category}`}
                     className="inline-flex items-center justify-center gap-2 h-13 px-8 text-base font-medium rounded-xl bg-zinc-800 text-foreground hover:bg-zinc-700 active:scale-[0.97] border border-border transition-all duration-200"
@@ -382,29 +366,7 @@ export default async function ProductPage({
           </section>
         )}
 
-        <div className="fixed bottom-0 left-0 right-0 z-30 p-4 pb-[max(1rem,env(safe-area-inset-bottom,1rem))] bg-gradient-to-t from-background via-background/95 to-transparent md:hidden">
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full h-13 text-base font-medium rounded-xl bg-[#25D366] text-white hover:bg-[#20BD5A] shadow-lg shadow-[#25D366]/15 transition-all duration-150 active:scale-[0.97]"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-            <span>Get This Custom Made</span>
-          </a>
-        </div>
+
       </article>
     </>
   )

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "1bcc6561-be17-4f58-9373-ca5eda7e3fe5",
+    "product_id": "mewtwo-armor-figure",
+    "image_url": "/images/products/Mew2-2.jpg",
+    "sort_order": 0,
+    "created_at": "2026-05-27T16:30:39.330Z"
+  },
+  {
+    "id": "249a2a82-251f-4d5c-bfd1-8b2022daaae4",
+    "product_id": "engineering-prototype",
+    "image_url": "/images/products/CustomGun-2.jpg",
+    "sort_order": 0,
+    "created_at": "2026-05-27T16:30:39.595Z"
+  },
+  {
+    "id": "3e128a77-7b38-468f-8060-42f5aabd9e62",
+    "product_id": "gengar-battle-figure",
+    "image_url": "/images/products/Gengar-2.jpg",
+    "sort_order": 0,
+    "created_at": "2026-05-27T23:55:31.070Z"
+  },
+  {
+    "id": "6e99defd-b685-499b-b654-f070410a8785",
+    "product_id": "hanuman-gold",
+    "image_url": "/images/products/WorkingImage-1.jpg",
+    "sort_order": 1,
+    "created_at": "2026-05-28T00:18:50.452Z"
+  },
+  {
+    "id": "739f4546-aac6-4e41-af38-99020d16971a",
+    "product_id": "mewtwo-armor-figure",
+    "image_url": "/images/products/Mew2-3.jpg",
+    "sort_order": 1,
+    "created_at": "2026-05-27T16:30:39.330Z"
+  },
+  {
+    "id": "73d15a9e-3785-4173-b6db-3fdbec347b5e",
+    "product_id": "hanuman-gold",
+    "image_url": "/images/products/HanumanStatueRaw-1.jpg",
+    "sort_order": 0,
+    "created_at": "2026-05-28T00:18:50.452Z"
+  },
+  {
+    "id": "76235c1e-24cb-484e-aed1-a20802fbc3cd",
+    "product_id": "ironman-mask",
+    "image_url": "/images/products/IronManMaskMaking.jpeg",
+    "sort_order": 0,
+    "created_at": "2026-06-08T13:27:25.530Z"
+  },
+  {
+    "id": "bbcf2700-3cc6-4c82-90d7-4ee25adc0044",
+    "product_id": "engineering-prototype",
+    "image_url": "/images/products/CustomGun-3.jpg",
+    "sort_order": 1,
+    "created_at": "2026-05-27T16:30:39.595Z"
+  },
+  {
+    "id": "ef5c433b-3cff-4066-9bfb-f4dacf93f687",
+    "product_id": "mewtwo-armor-figure",
+    "image_url": "/images/products/Mew2-4.jpg",
+    "sort_order": 2,
+    "created_at": "2026-05-27T16:30:39.330Z"
+  },
+  {
+    "id": "eff8c395-7a16-4183-962b-23f042793cb0",
+    "product_id": "shiva-white",
+    "image_url": "/images/products/ShivaBulk.PNG",
+    "sort_order": 0,
+    "created_at": "2026-05-27T16:30:38.802Z"
+  }
+]

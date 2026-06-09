@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
 import { CreateInquirySchema, UpdateInquiryStatusSchema } from "@/lib/validation/inquiry"
-import { getInquiryService } from "@/lib/storage/server"
+import {
+  createInquiryQuery,
+  getInquiriesQuery,
+  updateInquiryStatusQuery,
+} from "@/db/queries/inquiries"
 import type { InquiryResult, Inquiry } from "@/lib/storage"
 
 function parseZodIssues(error: { message: string }): string {
@@ -18,6 +22,11 @@ function parseZodIssues(error: { message: string }): string {
 export async function createInquiryAction(
   formData: FormData
 ): Promise<InquiryResult<Inquiry>> {
+  // Honeypot check — if filled, silently reject
+  if (formData.get("website")) {
+    return { success: false, error: "Invalid submission" }
+  }
+
   const rawAttachments = formData.get("attachments") as string | null
   let attachments: string[] = []
   if (rawAttachments) {
@@ -35,6 +44,7 @@ export async function createInquiryAction(
     customizable: formData.get("customizable") === "true",
     message: (formData.get("message") as string) ?? "",
     sourcePage: formData.get("sourcePage") as string,
+    source: formData.get("source") as string ?? "unknown",
     attachments,
   }
 
@@ -46,8 +56,7 @@ export async function createInquiryAction(
     }
   }
 
-  const service = getInquiryService()
-  return service.createInquiry(parsed.data)
+  return createInquiryQuery(parsed.data)
 }
 
 export async function getInquiriesAction(): Promise<InquiryResult<Inquiry[]>> {
@@ -58,8 +67,7 @@ export async function getInquiriesAction(): Promise<InquiryResult<Inquiry[]>> {
     return { success: false, error: err instanceof Error ? err.message : "Unauthorized" }
   }
 
-  const service = getInquiryService()
-  return service.getInquiries()
+  return getInquiriesQuery()
 }
 
 export async function updateInquiryStatusAction(
@@ -85,8 +93,7 @@ export async function updateInquiryStatusAction(
     }
   }
 
-  const service = getInquiryService()
-  const result = await service.updateInquiryStatus(parsed.data)
+  const result = await updateInquiryStatusQuery(parsed.data)
   if (result.success) {
     revalidatePath("/admin/inquiries")
   }

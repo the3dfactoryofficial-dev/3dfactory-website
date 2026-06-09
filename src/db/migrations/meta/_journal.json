@@ -1,61 +1,12 @@
 {
   "version": "7",
-  "dialect": "sqlite",
+  "dialect": "pg",
   "entries": [
     {
       "idx": 0,
-      "version": "6",
-      "when": 1779894966565,
-      "tag": "0000_lively_captain_flint",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1779898925990,
-      "tag": "0001_eager_power_pack",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1779902197960,
-      "tag": "0002_ambitious_red_skull",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1779967933469,
-      "tag": "0003_young_king_bedlam",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1779999999000,
-      "tag": "0004_perfect_indexes",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1780954726683,
-      "tag": "0005_bored_typhoid_mary",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "6",
-      "when": 1780954807281,
-      "tag": "0006_mature_the_liberteens",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "6",
-      "when": 1780956742592,
-      "tag": "0007_unknown_genesis",
+      "version": "7",
+      "when": 1781007545215,
+      "tag": "0000_wandering_umar",
       "breakpoints": true
     }
   ]

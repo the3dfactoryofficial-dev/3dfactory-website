@@ -1,22 +1,22 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core"
+import { pgTable, text, integer, boolean, timestamp, index } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
 
-export const users = sqliteTable("users", {
+export const users = pgTable("users", {
   id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name"),
   image: text("image"),
   role: text("role", { enum: ["admin", "user"] }).notNull().default("user"),
-  createdAt: text("created_at")
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
     .notNull()
-    .default("(datetime('now'))"),
-  updatedAt: text("updated_at")
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
     .notNull()
-    .default("(datetime('now'))"),
-  lastLoginAt: text("last_login_at"),
+    .defaultNow(),
+  lastLoginAt: timestamp("last_login_at", { withTimezone: true, mode: "string" }),
 })
 
-export const inquiries = sqliteTable("inquiries", {
+export const inquiries = pgTable("inquiries", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull(),
@@ -25,9 +25,7 @@ export const inquiries = sqliteTable("inquiries", {
   category: text("category").notNull(),
   quantity: integer("quantity").notNull().default(1),
   preferredSize: text("preferred_size").notNull().default(""),
-  customizable: integer("customizable", { mode: "boolean" })
-    .notNull()
-    .default(false),
+  customizable: boolean("customizable").notNull().default(false),
   message: text("message").notNull().default(""),
   sourcePage: text("source_page").notNull(),
   source: text("source").notNull().default("unknown"),
@@ -40,12 +38,12 @@ export const inquiries = sqliteTable("inquiries", {
   userId: text("user_id").references(() => users.id, {
     onDelete: "set null",
   }),
-  createdAt: text("created_at")
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
     .notNull()
-    .default("(datetime('now'))"),
+    .defaultNow(),
 })
 
-export const products = sqliteTable("products", {
+export const products = pgTable("products", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
@@ -62,46 +60,44 @@ export const products = sqliteTable("products", {
   dimensions: text("dimensions").notNull().default(""),
   technologies: text("technologies").notNull().default("[]"),
   featuredImage: text("featured_image").notNull().default(""),
-  isFeatured: integer("is_featured", { mode: "boolean" })
-    .notNull()
-    .default(false),
-  isActive: integer("is_active", { mode: "boolean" })
-    .notNull()
-    .default(false),
-  supportsBulkOrders: integer("supports_bulk_orders", { mode: "boolean" })
-    .notNull()
-    .default(false),
-  customizable: integer("customizable", { mode: "boolean" })
-    .notNull()
-    .default(false),
+  isFeatured: boolean("is_featured").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(false),
+  supportsBulkOrders: boolean("supports_bulk_orders").notNull().default(false),
+  customizable: boolean("customizable").notNull().default(false),
   printTime: text("print_time").notNull().default(""),
   finishType: text("finish_type").notNull().default(""),
   productionType: text("production_type", {
     enum: ["prototype", "single", "batch", "custom"],
   }).default("single"),
   minimumOrderQuantity: text("minimum_order_quantity").notNull().default(""),
-  createdAt: text("created_at")
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
     .notNull()
-    .default("(datetime('now'))"),
+    .defaultNow(),
   sortOrder: integer("sort_order").notNull().default(999),
-  updatedAt: text("updated_at")
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
     .notNull()
-    .default("(datetime('now'))"),
-})
+    .defaultNow(),
+}, (table) => ({
+  isActiveIdx: index("idx_products_is_active").on(table.isActive),
+  isFeaturedIdx: index("idx_products_is_featured").on(table.isFeatured),
+  categoryIdx: index("idx_products_category").on(table.category),
+}))
 
-export const productImages = sqliteTable("product_images", {
+export const productImages = pgTable("product_images", {
   id: text("id").primaryKey(),
   productId: text("product_id")
     .notNull()
     .references(() => products.id, { onDelete: "cascade" }),
   imageUrl: text("image_url").notNull(),
   sortOrder: integer("sort_order").notNull().default(0),
-  createdAt: text("created_at")
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
     .notNull()
-    .default("(datetime('now'))"),
-})
+    .defaultNow(),
+}, (table) => ({
+  productIdIdx: index("idx_product_images_product_id").on(table.productId),
+}))
 
-export const testimonials = sqliteTable("testimonials", {
+export const testimonials = pgTable("testimonials", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   role: text("role").notNull().default(""),
@@ -112,16 +108,19 @@ export const testimonials = sqliteTable("testimonials", {
   productId: text("product_id").references(() => products.id, {
     onDelete: "set null",
   }),
-  featured: integer("featured", { mode: "boolean" }).notNull().default(false),
-  createdAt: text("created_at")
+  featured: boolean("featured").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
     .notNull()
-    .default("(datetime('now'))"),
-  updatedAt: text("updated_at")
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
     .notNull()
-    .default("(datetime('now'))"),
-})
+    .defaultNow(),
+}, (table) => ({
+  featuredIdx: index("idx_testimonials_featured").on(table.featured),
+  productIdIdx: index("idx_testimonials_product_id").on(table.productId),
+}))
 
-export const productVideos = sqliteTable("product_videos", {
+export const productVideos = pgTable("product_videos", {
   id: text("id").primaryKey(),
   productId: text("product_id")
     .notNull()
@@ -129,21 +128,21 @@ export const productVideos = sqliteTable("product_videos", {
   videoUrl: text("video_url").notNull(),
   thumbnailUrl: text("thumbnail_url").notNull().default(""),
   sortOrder: integer("sort_order").notNull().default(0),
-  createdAt: text("created_at")
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
     .notNull()
-    .default("(datetime('now'))"),
+    .defaultNow(),
 })
 
-export const categories = sqliteTable("categories", {
+export const categories = pgTable("categories", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
   description: text("description").notNull().default(""),
   sortOrder: integer("sort_order").notNull().default(0),
-  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  createdAt: text("created_at")
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
     .notNull()
-    .default("(datetime('now'))"),
+    .defaultNow(),
 })
 
 export const productRelations = relations(products, ({ many, one }) => ({

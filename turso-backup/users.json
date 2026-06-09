@@ -1,0 +1,42 @@
+[
+  {
+    "id": "0d673e88-4647-4a52-84b8-0a6d581899b2",
+    "email": "kaushalbhat31@gmail.com",
+    "name": "Kaushal Bhat",
+    "image": "https://lh3.googleusercontent.com/a/ACg8ocJzko-vEcPzD5_IKoz8oP6Q78AgCQxlac6vssmR_qbjiUgU4ZJEVQ=s96-c",
+    "role": "user",
+    "created_at": "(datetime('now'))",
+    "updated_at": "2026-06-08T13:01:42.030Z",
+    "last_login_at": "2026-06-08T13:01:42.030Z"
+  },
+  {
+    "id": "9f443ba4-1df1-43a7-a8ee-2b0b03567485",
+    "email": "kaushalbhat0@gmail.com",
+    "name": "Kaushal Bhat",
+    "image": "https://lh3.googleusercontent.com/a/ACg8ocLK-yQ1F1_bVVYECYr4gEmQtPOMWFOJmIX7kjzqS44YWrVLww=s96-c",
+    "role": "admin",
+    "created_at": "(datetime('now'))",
+    "updated_at": "2026-06-08T23:06:56.038Z",
+    "last_login_at": "2026-06-08T23:06:56.038Z"
+  },
+  {
+    "id": "b4dda61d-1192-4f98-ae87-73fdd5c5fa06",
+    "email": "the3dfactoryofficial@gmail.com",
+    "name": "The 3D Factory",
+    "image": "https://lh3.googleusercontent.com/a/ACg8ocKnVr77DIXm_v5w9L-YZNH2ZcPQCRJLffM2yca5F8PaQ-47Fg=s96-c",
+    "role": "admin",
+    "created_at": "(datetime('now'))",
+    "updated_at": "(datetime('now'))",
+    "last_login_at": "2026-06-09T11:19:02.438Z"
+  },
+  {
+    "id": "c5f6a403-e794-405a-84a6-8aa22be5026d",
+    "email": "kaushalbhat97@gmail.com",
+    "name": "Kaushal bhat",
+    "image": "https://lh3.googleusercontent.com/a/ACg8ocLtZb7ULDmJDTMbpH9CyDnLqFB6T7AZ2yA0QvdDfLBlTf5JIg=s96-c",
+    "role": "user",
+    "created_at": "(datetime('now'))",
+    "updated_at": "(datetime('now'))",
+    "last_login_at": "2026-05-28T12:28:59.077Z"
+  }
+]

@@ -12,6 +12,7 @@ export interface Inquiry {
   customizable: boolean
   message: string
   sourcePage: string
+  source: string
   attachments?: string[]
   status: InquiryStatus
   userId?: string | null
@@ -29,6 +30,7 @@ export interface CreateInquiryInput {
   customizable: boolean
   message?: string
   sourcePage: string
+  source?: string
   attachments?: string[]
 }
 

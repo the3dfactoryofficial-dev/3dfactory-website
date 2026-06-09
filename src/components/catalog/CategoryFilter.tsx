@@ -2,7 +2,7 @@
 
 import { memo, useMemo } from "react"
 import { cn } from "@/lib/utils"
-import { Sparkles, Scroll, Cog, Wrench } from "lucide-react"
+import { Sparkles, Scroll, Cog, Wrench, Layers } from "lucide-react"
 
 const categoryIcons: Record<string, typeof Sparkles> = {
   "spiritual-decor": Sparkles,
@@ -11,8 +11,7 @@ const categoryIcons: Record<string, typeof Sparkles> = {
   "custom": Wrench,
 }
 
-const fallbackIcon = Sparkles
-const allIcon = Sparkles
+const fallbackIcon = Layers
 
 interface CategoryFilterProps {
   active: string | null
@@ -22,7 +21,6 @@ interface CategoryFilterProps {
 }
 
 export const CategoryFilter = memo(function CategoryFilter({ active, onChange, counts, slugMap }: CategoryFilterProps) {
-
   const categories = useMemo(() => {
     const entries = slugMap ? Object.entries(slugMap).map(([value, label]) => ({ value, label })) : []
     return [
@@ -32,9 +30,9 @@ export const CategoryFilter = memo(function CategoryFilter({ active, onChange, c
   }, [slugMap])
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 sm:justify-center sm:flex-wrap">
+    <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center">
       {categories.map((cat) => {
-        const Icon = cat.value === "all" ? allIcon : (categoryIcons[cat.value] ?? fallbackIcon)
+        const Icon = cat.value === "all" ? fallbackIcon : (categoryIcons[cat.value] ?? fallbackIcon)
         const count = counts?.[cat.value] ?? 0
         const isActive = cat.value === "all" ? !active : active === cat.value
 
@@ -43,23 +41,20 @@ export const CategoryFilter = memo(function CategoryFilter({ active, onChange, c
             key={cat.value}
             onClick={() => onChange(cat.value === "all" ? null : cat.value)}
             className={cn(
-              "group relative inline-flex items-center gap-1.5 shrink-0 px-4 py-2.5 text-sm font-medium rounded-xl border transition-all duration-200 cursor-pointer select-none",
+              "inline-flex items-center gap-1.5 shrink-0 px-3.5 py-2 text-[13px] font-medium rounded-lg border transition-all duration-150 cursor-pointer select-none whitespace-nowrap",
               isActive
-                ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20 scale-105 active:scale-[0.97]"
-                : "bg-card text-muted-foreground border-border hover:bg-card-hover hover:text-foreground hover:border-zinc-600 active:scale-[0.97]"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card text-muted-foreground border-border hover:text-foreground hover:border-zinc-600"
             )}
           >
-            <Icon className={cn(
-              "w-4 h-4 transition-transform duration-300",
-              isActive ? "scale-110" : "group-hover:scale-110"
-            )} />
+            <Icon className="w-3.5 h-3.5" />
             <span>{cat.label}</span>
             {count > 0 && (
               <span className={cn(
-                "inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-semibold rounded-full transition-all duration-300",
+                "ml-0.5 text-[11px] font-semibold tabular-nums",
                 isActive
-                  ? "bg-white/20 text-white"
-                  : "bg-zinc-800 text-muted-foreground group-hover:bg-zinc-700"
+                  ? "text-primary-foreground/70"
+                  : "text-muted-foreground/60"
               )}>
                 {count}
               </span>

@@ -139,9 +139,9 @@ export function InquiryForm() {
               <button
                 type="submit"
                 className={cn(
-                  "inline-flex items-center justify-center gap-2.5 w-full h-13 text-base font-medium rounded-xl",
-                  "bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-[0.97]",
-                  "shadow-lg shadow-[#25D366]/20 transition-all duration-200 cursor-pointer"
+"inline-flex items-center justify-center gap-2.5 w-full h-13 text-base font-medium rounded-lg",
+                   "bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-[0.97]",
+                   "transition-all duration-200 cursor-pointer"
                 )}
               >
                 <MessageCircle className="w-5 h-5" />

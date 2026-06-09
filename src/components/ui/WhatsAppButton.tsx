@@ -38,10 +38,10 @@ export function WhatsAppButton({
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-all duration-200",
+        "inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-200",
         "h-11 px-6 text-sm",
         variant === "primary" &&
-          "bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-[0.97] shadow-lg shadow-[#25D366]/20",
+          "bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-[0.97]",
         variant === "secondary" &&
           "border border-[#25D366] text-[#25D366] hover:bg-[#25D366]/10 active:scale-[0.97]",
         className

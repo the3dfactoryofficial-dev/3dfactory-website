@@ -28,7 +28,7 @@ export function AdminSidebar({ email, signOutForm }: { email: string; signOutFor
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-4 h-11 rounded-xl text-sm font-medium transition-all duration-150",
+                "flex items-center gap-3 px-4 h-11 rounded-lg text-sm font-medium transition-all duration-150",
                 isActive
                   ? "bg-primary/10 text-primary border border-primary/20"
                   : "text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:bg-zinc-800 border border-transparent select-none"

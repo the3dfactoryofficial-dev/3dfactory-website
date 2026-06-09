@@ -300,7 +300,7 @@ export function ProductGallery({ product, onClose }: ProductGalleryProps) {
                   </p>
                   <button
                     onClick={() => setShowInquiry(true)}
-                    className="inline-flex items-center justify-center gap-2 w-full h-11 px-6 text-sm font-medium rounded-xl bg-[#25D366] text-white hover:bg-[#20BD5A] transition-all duration-200 shadow-lg shadow-[#25D366]/20 cursor-pointer"
+                    className="inline-flex items-center justify-center gap-2 w-full h-11 px-6 text-sm font-medium rounded-lg bg-[#25D366] text-white hover:bg-[#20BD5A] transition-all duration-200 cursor-pointer"
                   >
                     <MessageCircle className="w-4 h-4" />
                     <span>Inquire About This Product</span>

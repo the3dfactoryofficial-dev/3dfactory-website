@@ -124,7 +124,7 @@ export function QuickInquiry({
   }
 
   const inputClass =
-    "w-full h-11 px-4 text-sm bg-surface border border-border rounded-xl text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all duration-200"
+    "w-full h-11 px-4 text-sm bg-surface border border-border rounded-lg text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all duration-200"
 
   return (
     <div className="fixed inset-0 z-60 flex items-start justify-center bg-surface/60 backdrop-blur-sm p-4 pt-[10vh] overflow-y-auto">
@@ -152,7 +152,7 @@ export function QuickInquiry({
             </p>
             <button
               onClick={onClose}
-              className="mt-6 inline-flex items-center gap-2 h-11 px-6 text-sm font-medium rounded-xl bg-zinc-800 text-foreground hover:bg-zinc-700 transition-colors"
+              className="mt-6 inline-flex items-center gap-2 h-11 px-6 text-sm font-medium rounded-lg bg-zinc-800 text-foreground hover:bg-zinc-700 transition-colors"
             >
               Close
             </button>
@@ -224,7 +224,7 @@ export function QuickInquiry({
                 <div className="flex items-center gap-3">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-800 text-foreground hover:bg-zinc-700 active:scale-90 transition-all duration-200 border border-border"
+                      className="flex items-center justify-center w-10 h-10 rounded-lg bg-zinc-800 text-foreground hover:bg-zinc-700 active:scale-90 transition-all duration-200 border border-border"
                       aria-label="Decrease quantity"
                     >
                       <Minus className="w-4 h-4" />
@@ -234,7 +234,7 @@ export function QuickInquiry({
                   </span>
                     <button
                       onClick={() => setQuantity(Math.min(10000, quantity + 1))}
-                      className="flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-800 text-foreground hover:bg-zinc-700 active:scale-90 transition-all duration-200 border border-border"
+                      className="flex items-center justify-center w-10 h-10 rounded-lg bg-zinc-800 text-foreground hover:bg-zinc-700 active:scale-90 transition-all duration-200 border border-border"
                       aria-label="Increase quantity"
                     >
                       <Plus className="w-4 h-4" />
@@ -269,7 +269,7 @@ export function QuickInquiry({
                       key={opt}
                       onClick={() => setNeedsCustomization(opt)}
                       className={cn(
-                        "flex-1 h-11 text-sm font-medium rounded-xl border transition-all duration-200",
+                        "flex-1 h-11 text-sm font-medium rounded-lg border transition-all duration-200",
                         needsCustomization === opt
                           ? "bg-primary text-primary-foreground border-primary"
                           : "bg-surface text-muted-foreground border-border hover:bg-zinc-800 hover:text-foreground",
@@ -296,7 +296,7 @@ export function QuickInquiry({
                     value={customReq}
                     onChange={(e) => setCustomReq(e.target.value)}
                     placeholder="Size changes, color, material, engraving, modifications..."
-                    className="w-full px-4 py-3 text-sm bg-surface border border-border rounded-xl text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all duration-200 resize-y min-h-[80px]"
+                    className="w-full px-4 py-3 text-sm bg-surface border border-border rounded-lg text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all duration-200 resize-y min-h-[80px]"
                   />
                 </div>
               )}
@@ -335,7 +335,7 @@ export function QuickInquiry({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
-                  className="inline-flex items-center gap-2 h-9 px-3.5 text-xs font-medium rounded-xl bg-zinc-800 text-muted-foreground hover:text-foreground hover:bg-zinc-700 border border-border transition-all disabled:opacity-50"
+                  className="inline-flex items-center gap-2 h-9 px-3.5 text-xs font-medium rounded-lg bg-zinc-800 text-muted-foreground hover:text-foreground hover:bg-zinc-700 border border-border transition-all disabled:opacity-50"
                 >
                   {uploading ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -347,7 +347,7 @@ export function QuickInquiry({
               </div>
 
               {error && (
-                <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-2">
+                <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2">
                   {error}
                 </p>
               )}
@@ -356,7 +356,7 @@ export function QuickInquiry({
                 onClick={handleSubmit}
                 disabled={saving}
                 className={cn(
-                  "inline-flex items-center justify-center gap-2.5 w-full h-13 text-base font-medium rounded-xl bg-[#25D366] text-white shadow-lg shadow-[#25D366]/20 transition-all duration-200",
+                  "inline-flex items-center justify-center gap-2.5 w-full h-13 text-base font-medium rounded-lg bg-[#25D366] text-white transition-all duration-200",
                   saving
                     ? "opacity-60 cursor-not-allowed"
                     : "hover:bg-[#20BD5A] active:scale-[0.97] cursor-pointer"

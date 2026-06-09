@@ -38,6 +38,7 @@ export function Testimonials({ testimonials = [] }: { testimonials?: Testimonial
   return (
     <Section id="testimonials">
       <Heading
+        eyebrow="Testimonials"
         title="What Our Clients Say"
         subtitle="Hear from creators, collectors, and brands who trust us to bring their ideas to life."
       />

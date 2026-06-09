@@ -46,7 +46,7 @@ export function ResponseExpectations() {
             {expectations.map((item) => (
               <div
                 key={item.title}
-                className="flex items-start gap-3 p-4 rounded-xl bg-surface border border-border"
+                className="flex items-start gap-3 p-4 rounded-xl bg-zinc-900 border border-zinc-800"
               >
                 <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 shrink-0 mt-0.5">
                   <item.icon className="w-4 h-4 text-primary" />

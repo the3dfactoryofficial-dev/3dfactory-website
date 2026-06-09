@@ -45,6 +45,7 @@ export function TrustSection() {
     <Section id="trust" dark className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
       <Heading
+        eyebrow="Capabilities"
         title="Built for Creators, Collectors & Brands"
         subtitle="Whether you need a one-of-a-kind custom piece or a batch of 500, we have the craft and experience to deliver."
       />
@@ -64,7 +65,7 @@ export function TrustSection() {
           return (
             <div
               key={audience.title}
-              className="group relative rounded-2xl bg-zinc-900 border border-zinc-800 p-6 md:p-8 hover:border-primary/30 active:border-primary/30 transition-colors duration-200 select-none"
+              className="group relative rounded-xl bg-zinc-900 border border-zinc-800 p-6 md:p-8 hover:border-primary/30 active:border-primary/30 transition-colors duration-200 select-none"
             >
               <div className="flex items-start gap-4">
                 <div className="shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary">

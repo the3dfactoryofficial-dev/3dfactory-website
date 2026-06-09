@@ -40,8 +40,8 @@ export function Navbar() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled
-          ? "bg-background/80 backdrop-blur-xl border-b border-border shadow-lg shadow-zinc-950/10"
-          : "bg-transparent"
+? "bg-background/80 backdrop-blur-xl border-b border-border"
+           : "bg-transparent"
       )}
     >
       <nav className="container-main flex items-center justify-between h-16 md:h-18">
@@ -74,7 +74,7 @@ export function Navbar() {
             href={`https://wa.me/${SITE.whatsapp}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 h-10 px-5 text-sm font-medium rounded-xl bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-95 transition-all duration-200 shadow-lg shadow-[#25D366]/20"
+            className="inline-flex items-center gap-2 h-10 px-5 text-sm font-medium rounded-lg bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-95 transition-all duration-200"
           >
             <MessageCircle className="w-4 h-4" />
             <span>WhatsApp</span>
@@ -84,7 +84,7 @@ export function Navbar() {
 
           <button
             onClick={() => setIsMobileOpen(!isMobileOpen)}
-            className="md:hidden inline-flex items-center justify-center w-11 h-11 rounded-xl text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-150"
+            className="md:hidden inline-flex items-center justify-center w-11 h-11 rounded-lg text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-150"
             aria-label={isMobileOpen ? "Close menu" : "Open menu"}
         >
           {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -119,7 +119,7 @@ export function Navbar() {
                 href={`https://wa.me/${SITE.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 h-12 text-sm font-medium rounded-xl bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-[0.97] transition-all duration-200"
+                className="inline-flex items-center justify-center gap-2 h-12 text-sm font-medium rounded-lg bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-[0.97] transition-all duration-200"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>Chat on WhatsApp</span>

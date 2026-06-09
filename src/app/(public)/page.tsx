@@ -9,6 +9,7 @@ import { Testimonials } from "@/components/home/Testimonials"
 import { FAQ } from "@/components/home/FAQ"
 import { InstagramTrust } from "@/components/home/InstagramTrust"
 import { TrustSection } from "@/components/home/TrustSection"
+import { ManufacturingCapabilities } from "@/components/home/ManufacturingCapabilities"
 import { CTABanner } from "@/components/home/CTABanner"
 import { faqItems } from "@/data/faq"
 
@@ -51,6 +52,7 @@ export default async function Home() {
       <Materials />
       <Testimonials testimonials={testimonials} />
       <TrustSection />
+      <ManufacturingCapabilities />
       <FAQ />
       <InstagramTrust />
       <CTABanner />

@@ -17,6 +17,7 @@ export function FAQ() {
   return (
     <Section id="faq" dark>
       <Heading
+        eyebrow="FAQ"
         title="Frequently Asked Questions"
         subtitle="Everything you need to know before placing your order. If you have more questions, just reach out on WhatsApp."
       />

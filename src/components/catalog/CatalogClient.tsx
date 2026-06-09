@@ -135,9 +135,9 @@ export const CatalogClient = memo(function CatalogClient({
               rel="noopener noreferrer"
               onClick={() => trackWhatsAppClick("catalog_cta")}
               className={cn(
-                "inline-flex items-center justify-center gap-2.5 h-13 px-8 text-base font-medium rounded-xl mt-6",
+                "inline-flex items-center justify-center gap-2.5 h-13 px-8 text-base font-medium rounded-lg mt-6",
                 "bg-primary text-primary-foreground hover:bg-primary-hover active:scale-[0.97]",
-                "shadow-lg shadow-primary/25 transition-all duration-200 select-none"
+                "transition-all duration-200 select-none"
               )}
             >
               <MessageCircle className="w-5 h-5" />

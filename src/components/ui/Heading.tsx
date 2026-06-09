@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils"
 interface HeadingProps {
   title: string
   subtitle?: string
+  eyebrow?: string
   as?: "h1" | "h2" | "h3" | "h4"
   className?: string
   align?: "left" | "center"
@@ -11,6 +12,7 @@ interface HeadingProps {
 export function Heading({
   title,
   subtitle,
+  eyebrow,
   as: Tag = "h2",
   className,
   align = "center",
@@ -23,7 +25,12 @@ export function Heading({
         className
       )}
     >
-      <Tag className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+      {eyebrow && (
+        <span className="inline-block text-[11px] font-semibold tracking-widest uppercase text-primary mb-3">
+          {eyebrow}
+        </span>
+      )}
+      <Tag className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl lg:tracking-[-0.02em]">
         {title}
       </Tag>
       {subtitle && (

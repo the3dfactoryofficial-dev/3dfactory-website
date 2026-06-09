@@ -177,7 +177,7 @@ export function FeaturedGallery({ products }: { products: Product[] }) {
           >
             <Link
               href={`/catalog/${product.slug}`}
-              className="group block relative aspect-[4/5] rounded-2xl overflow-hidden bg-surface shadow-lg"
+              className="group block relative aspect-[4/5] rounded-xl overflow-hidden bg-surface"
             >
               <Image
                 src={optimizeImage(product.featuredImage, 800)}
@@ -226,7 +226,7 @@ export function FeaturedGallery({ products }: { products: Product[] }) {
         <>
           <button
             onClick={goPrev}
-            className="hidden md:inline-flex absolute left-2 top-1/2 -translate-y-1/2 items-center justify-center w-11 h-11 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white hover:bg-black/70 active:scale-[0.96] transition-all z-10 shadow-sm"
+            className="hidden md:inline-flex absolute left-2 top-1/2 -translate-y-1/2 items-center justify-center w-11 h-11 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white hover:bg-black/70 active:scale-[0.96] transition-all z-10"
             aria-label="Previous featured product"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -234,7 +234,7 @@ export function FeaturedGallery({ products }: { products: Product[] }) {
 
           <button
             onClick={goNext}
-            className="hidden md:inline-flex absolute right-2 top-1/2 -translate-y-1/2 items-center justify-center w-11 h-11 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white hover:bg-black/70 active:scale-[0.96] transition-all z-10 shadow-sm"
+            className="hidden md:inline-flex absolute right-2 top-1/2 -translate-y-1/2 items-center justify-center w-11 h-11 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white hover:bg-black/70 active:scale-[0.96] transition-all z-10"
             aria-label="Next featured product"
           >
             <ChevronRight className="w-5 h-5" />

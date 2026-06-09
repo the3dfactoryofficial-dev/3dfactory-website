@@ -10,7 +10,7 @@ export function AuthStatus() {
   const isLoading = status === "loading"
 
   if (isLoading) {
-    return <div className="w-[88px] h-10 rounded-xl bg-zinc-800/50 animate-pulse" />
+    return <div className="w-[88px] h-10 rounded-lg bg-zinc-800/50 animate-pulse" />
   }
 
   if (!session) {
@@ -18,7 +18,7 @@ export function AuthStatus() {
       <button
         onClick={() => signIn("google")}
         className={cn(
-          "inline-flex items-center justify-center gap-2 h-10 px-5 text-sm font-medium rounded-xl",
+          "inline-flex items-center justify-center gap-2 h-10 px-5 text-sm font-medium rounded-lg",
           "bg-zinc-800 text-foreground hover:bg-zinc-700 border border-border",
           "transition-all duration-200 w-full sm:w-auto"
         )}
@@ -34,7 +34,7 @@ export function AuthStatus() {
       <Link
         href="/profile"
         className={cn(
-          "inline-flex items-center justify-center gap-2 h-10 px-4 text-sm font-medium rounded-xl",
+          "inline-flex items-center justify-center gap-2 h-10 px-4 text-sm font-medium rounded-lg",
           "bg-zinc-800 text-foreground hover:bg-zinc-700 border border-border",
           "transition-all duration-200"
         )}
@@ -47,7 +47,7 @@ export function AuthStatus() {
         <Link
           href="/admin/products"
           className={cn(
-            "inline-flex items-center justify-center gap-2 h-10 px-4 text-sm font-medium rounded-xl",
+            "inline-flex items-center justify-center gap-2 h-10 px-4 text-sm font-medium rounded-lg",
             "bg-primary text-primary-foreground hover:bg-primary-hover",
             "transition-all duration-200"
           )}
@@ -60,7 +60,7 @@ export function AuthStatus() {
       <button
         onClick={() => signOut({ redirectTo: "/" })}
         className={cn(
-          "inline-flex items-center justify-center gap-2 h-10 px-4 text-sm font-medium rounded-xl",
+          "inline-flex items-center justify-center gap-2 h-10 px-4 text-sm font-medium rounded-lg",
           "bg-zinc-800 text-foreground hover:bg-zinc-700 border border-border",
           "transition-all duration-200"
         )}

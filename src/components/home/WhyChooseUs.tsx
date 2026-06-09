@@ -53,6 +53,7 @@ export function WhyChooseUs() {
   return (
     <Section id="why-choose-us">
       <Heading
+        eyebrow="Why Us"
         title="Why Creators Choose Us"
         subtitle="We're a custom 3D creation studio focused on precision, craftsmanship, and clean finishing — from personalized gifts to production-scale orders."
       />

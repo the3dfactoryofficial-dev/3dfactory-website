@@ -69,10 +69,10 @@ export function Hero() {
 
           <motion.h1
             variants={fadeUp}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-[1.05]"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight lg:tracking-[-0.03em] leading-[1.05]"
           >
             Custom 3D Creations{" "}
-            <span className="bg-gradient-to-r from-amber-500 via-amber-300 to-amber-500 bg-clip-text text-transparent text-glow-amber">
+            <span className="bg-gradient-to-r from-amber-500 via-amber-300 to-amber-500 bg-clip-text text-transparent">
               Made Just for You
             </span>
           </motion.h1>
@@ -96,9 +96,9 @@ export function Hero() {
               rel="noopener noreferrer"
               onClick={() => trackWhatsAppClick("hero")}
               className={cn(
-                "inline-flex items-center justify-center gap-2.5 h-13 px-8 text-base font-medium rounded-xl",
+                "inline-flex items-center justify-center gap-2.5 h-13 px-8 text-base font-medium rounded-lg",
                 "bg-primary text-primary-foreground hover:bg-primary-hover active:scale-[0.97]",
-                "shadow-lg shadow-primary/25 transition-all duration-200",
+                "transition-all duration-200",
                 "w-full sm:w-auto select-none"
               )}
             >
@@ -109,7 +109,7 @@ export function Hero() {
             <Link
               href="/catalog"
               className={cn(
-                "inline-flex items-center justify-center gap-2.5 h-13 px-8 text-base font-medium rounded-xl",
+                "inline-flex items-center justify-center gap-2.5 h-13 px-8 text-base font-medium rounded-lg",
                 "border border-border text-foreground hover:bg-zinc-800 hover:border-zinc-600 active:scale-[0.97]",
                 "transition-all duration-200",
                 "w-full sm:w-auto select-none"
@@ -127,7 +127,7 @@ export function Hero() {
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface border border-border/50"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-zinc-900/80 border border-zinc-800"
               >
                 <stat.icon className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium text-muted-foreground text-center leading-snug">

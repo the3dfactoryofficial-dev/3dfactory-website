@@ -67,7 +67,7 @@ export function StickyInquiryBar() {
       rel="noopener noreferrer"
       onClick={handleClick}
       style={{ display: "none" }}
-      className="fixed bottom-24 right-5 z-30 flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-xl shadow-[#25D366]/20 hover:bg-[#20BD5A] active:scale-95 transition-all duration-200 md:hidden select-none"
+      className="fixed bottom-24 right-5 z-30 flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-95 transition-all duration-200 md:hidden select-none"
       aria-label="Chat on WhatsApp"
     >
       <MessageCircle className="w-7 h-7" />

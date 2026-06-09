@@ -10,7 +10,7 @@ export function GoogleSignInButton() {
   return (
     <button
       onClick={() => signIn("google", { redirectTo: callbackUrl })}
-      className="flex items-center justify-center gap-3 w-full h-13 px-6 text-base font-medium rounded-xl bg-white text-zinc-900 hover:bg-zinc-100 transition-all duration-200 shadow-lg shadow-white/10"
+      className="flex items-center justify-center gap-3 w-full h-13 px-6 text-base font-medium rounded-lg bg-white text-zinc-900 hover:bg-zinc-100 transition-all duration-200"
     >
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>

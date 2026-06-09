@@ -54,6 +54,7 @@ export function Materials() {
   return (
     <Section id="materials" dark>
       <Heading
+        eyebrow="Materials"
         title="Materials We Print"
         subtitle="Every material is selected for its specific finish, strength, and application. We guide you to the right choice for your project."
       />

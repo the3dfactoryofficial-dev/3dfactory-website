@@ -13,10 +13,10 @@ export function ProductPageCTA({ productName, productSlug, categoryLabel }: Prod
   const [showInquiry, setShowInquiry] = useState(false)
 
   const buttonClass =
-    "inline-flex items-center justify-center gap-2.5 h-13 px-8 text-base font-medium rounded-xl bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-[0.97] shadow-lg shadow-[#25D366]/20 transition-all duration-200 cursor-pointer"
+    "inline-flex items-center justify-center gap-2.5 h-13 px-8 text-base font-medium rounded-lg bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-[0.97] transition-all duration-200 cursor-pointer"
 
   const mobileButtonClass =
-    "flex items-center justify-center gap-2 w-full h-13 text-base font-medium rounded-xl bg-[#25D366] text-white hover:bg-[#20BD5A] shadow-lg shadow-[#25D366]/15 transition-all duration-150 active:scale-[0.97] cursor-pointer"
+    "flex items-center justify-center gap-2 w-full h-13 text-base font-medium rounded-lg bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-[0.97] transition-all duration-150 cursor-pointer"
 
   return (
     <>

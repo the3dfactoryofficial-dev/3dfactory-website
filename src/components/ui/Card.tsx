@@ -20,8 +20,8 @@ export function Card({
   return (
     <Tag
       className={cn(
-        "rounded-2xl bg-card border border-border overflow-hidden select-none",
-        hover && "transition-all duration-200 hover:bg-card-hover hover:border-zinc-600 hover:shadow-xl hover:shadow-zinc-950/30 active:scale-[0.99]",
+        "rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden select-none",
+        hover && "transition-colors duration-200 hover:bg-zinc-800/50 hover:border-zinc-700",
         className
       )}
       style={style}

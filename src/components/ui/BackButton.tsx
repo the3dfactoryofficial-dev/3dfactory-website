@@ -16,9 +16,9 @@ const variantStyles: Record<string, string> = {
   ghost:
     "text-muted-foreground hover:text-foreground hover:bg-zinc-800/50",
   glass:
-    "bg-black/55 backdrop-blur-md border border-white/10 text-foreground hover:bg-black/70 shadow-sm",
+    "bg-black/55 backdrop-blur-md border border-white/10 text-foreground hover:bg-black/70",
   solid:
-    "bg-surface border border-border text-foreground hover:bg-zinc-800 shadow-sm",
+    "bg-surface border border-border text-foreground hover:bg-zinc-800",
 }
 
 export function BackButton({

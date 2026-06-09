@@ -35,9 +35,9 @@ export function CTABanner() {
               target="_blank"
               rel="noopener noreferrer"
               className={cn(
-                "inline-flex items-center justify-center gap-2.5 h-14 px-9 text-base font-medium rounded-xl",
+                "inline-flex items-center justify-center gap-2.5 h-14 px-9 text-base font-medium rounded-lg",
                 "bg-primary text-primary-foreground hover:bg-primary-hover active:scale-[0.97]",
-                "shadow-lg shadow-primary/25 transition-all duration-200",
+                "transition-all duration-200",
                 "w-full sm:w-auto select-none"
               )}
             >
@@ -48,7 +48,7 @@ export function CTABanner() {
             <Link
               href="/catalog"
               className={cn(
-                "inline-flex items-center justify-center gap-2.5 h-14 px-9 text-base font-medium rounded-xl",
+                "inline-flex items-center justify-center gap-2.5 h-14 px-9 text-base font-medium rounded-lg",
                 "border border-border text-foreground hover:bg-zinc-800 hover:border-zinc-600 active:scale-[0.97]",
                 "transition-all duration-200",
                 "w-full sm:w-auto select-none"

@@ -23,9 +23,9 @@ export function AboutCTA() {
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
-              "inline-flex items-center justify-center gap-2.5 h-14 px-9 text-base font-medium rounded-xl mt-8",
+              "inline-flex items-center justify-center gap-2.5 h-14 px-9 text-base font-medium rounded-lg mt-8",
               "bg-primary text-primary-foreground hover:bg-primary-hover active:scale-[0.97]",
-              "shadow-lg shadow-primary/25 transition-all duration-200 select-none"
+              "transition-all duration-200 select-none"
             )}
           >
             <MessageCircle className="w-5 h-5" />

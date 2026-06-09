@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { MessageCircle, Sparkles } from "lucide-react"
+import { MessageCircle, Sparkles, Clock } from "lucide-react"
 import type { Product } from "@/types"
 import { Card } from "@/components/ui/Card"
 import { cn } from "@/lib/utils"
@@ -26,7 +26,7 @@ export function ProductCard({ product, categoryLabel }: { product: Product; cate
             alt={product.title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-            className="object-cover transition-transform duration-500 hover:scale-105"
+            className="object-cover transition-transform duration-500 hover:scale-[1.02]"
           />
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -69,13 +69,18 @@ export function ProductCard({ product, categoryLabel }: { product: Product; cate
             </span>
           )}
 
+          <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground">
+            <Clock className="w-3 h-3" />
+            <span>3–5 day turnaround</span>
+          </div>
+
           <div className="mt-3 pt-3 border-t border-border">
             <button
               onClick={() => setShowInquiry(true)}
               className={cn(
-                "inline-flex items-center justify-center gap-2 w-full h-10 text-sm font-medium rounded-xl",
+                "inline-flex items-center justify-center gap-2 w-full h-10 text-sm font-medium rounded-lg",
                 "bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-[0.97]",
-                "transition-all duration-200 shadow-md shadow-[#25D366]/15 cursor-pointer"
+                "transition-colors duration-150 cursor-pointer"
               )}
             >
               <MessageCircle className="w-4 h-4" />

@@ -8,7 +8,7 @@ export function ContactCTA() {
   return (
     <section className="pb-24 md:pb-32">
       <div className="container-main">
-        <div className="max-w-xl mx-auto text-center rounded-2xl bg-surface border border-border p-10 md:p-12">
+        <div className="max-w-xl mx-auto text-center rounded-xl bg-zinc-900 border border-zinc-800 p-10 md:p-12">
           <h2 className="text-xl sm:text-2xl font-semibold text-foreground">
             Prefer to jump straight in?
           </h2>
@@ -21,9 +21,9 @@ export function ContactCTA() {
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
-              "inline-flex items-center justify-center gap-2.5 h-13 px-8 text-base font-medium rounded-xl mt-6",
+              "inline-flex items-center justify-center gap-2.5 h-13 px-8 text-base font-medium rounded-lg mt-6",
               "bg-primary text-primary-foreground hover:bg-primary-hover active:scale-[0.97]",
-              "shadow-lg shadow-primary/25 transition-all duration-200 select-none"
+              "transition-all duration-200 select-none"
             )}
           >
             <MessageCircle className="w-5 h-5" />

@@ -39,7 +39,7 @@ export async function createProductQuery(input: {
       slug: input.slug,
       description: input.description,
       shortDescription: input.shortDescription,
-      category: input.category as ProductCategory,
+      category: input.category,
       categoryId: input.categoryId,
       priceRange: input.priceRange,
       material: input.material,
@@ -114,12 +114,7 @@ export async function updateProductQuery(
       .update(products)
       .set({
         ...fields,
-        category: category as
-          | "spiritual-decor"
-          | "cosplay"
-          | "prototypes"
-          | "custom"
-          | undefined,
+        category: category ?? undefined,
         productionType: productionType as
           | "prototype"
           | "single"
@@ -433,7 +428,7 @@ export async function getProductsByCategoryQuery(
         and(
           categoryId
             ? eq(products.categoryId, categoryId)
-            : eq(products.category, categorySlugOrId as ProductCategory),
+            : eq(products.category, categorySlugOrId),
           eq(products.isActive, true)
         )
       )

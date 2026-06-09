@@ -6,7 +6,7 @@ export interface DBProduct {
   slug: string
   description: string
   shortDescription: string
-  category: ProductCategory
+  category: string
   categoryId: string | null
   priceRange: string
   material: string

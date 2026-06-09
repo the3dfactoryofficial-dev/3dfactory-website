@@ -47,6 +47,7 @@ export async function createCategoryAction(
     })
 
     const parsed = CreateCategorySchema.parse(raw)
+    parsed.isActive = true
     const result = await createCategoryQuery(parsed)
     if (result.success) revalidateAll()
     return result

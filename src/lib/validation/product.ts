@@ -9,7 +9,7 @@ export const CreateProductSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes"),
   description: z.string().max(5000).default(""),
   shortDescription: z.string().max(300).default(""),
-  category: z.enum(["spiritual-decor", "cosplay", "prototypes", "custom"]),
+  category: z.string().min(1, "Category is required"),
   categoryId: z.string().optional(),
   priceRange: z.string().max(100).default(""),
   material: z.string().max(200).default(""),

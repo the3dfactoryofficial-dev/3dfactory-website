@@ -52,9 +52,7 @@ export const products = pgTable("products", {
   categoryId: text("category_id").references(() => categories.id, {
     onDelete: "set null",
   }),
-  category: text("category", {
-    enum: ["spiritual-decor", "cosplay", "prototypes", "custom"],
-  }).notNull(),
+  category: text("category").notNull(),
   priceRange: text("price_range").notNull().default(""),
   material: text("material").notNull().default(""),
   dimensions: text("dimensions").notNull().default(""),

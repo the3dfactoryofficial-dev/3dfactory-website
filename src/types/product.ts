@@ -24,11 +24,7 @@ export interface Product {
   minimumOrderQuantity?: string
 }
 
-export type ProductCategory =
-  | "spiritual-decor"
-  | "cosplay"
-  | "prototypes"
-  | "custom"
+export type ProductCategory = string
 
 export const PRODUCT_CATEGORIES: { value: ProductCategory; label: string }[] = [
   { value: "spiritual-decor", label: "Spiritual Decor" },

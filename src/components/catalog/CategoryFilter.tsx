@@ -11,6 +11,7 @@ const categoryIcons: Record<string, typeof Sparkles> = {
   "custom": Wrench,
 }
 
+const fallbackIcon = Sparkles
 const allIcon = Sparkles
 
 interface CategoryFilterProps {
@@ -33,7 +34,7 @@ export const CategoryFilter = memo(function CategoryFilter({ active, onChange, c
   return (
     <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 sm:justify-center sm:flex-wrap">
       {categories.map((cat) => {
-        const Icon = cat.value === "all" ? allIcon : categoryIcons[cat.value]
+        const Icon = cat.value === "all" ? allIcon : (categoryIcons[cat.value] ?? fallbackIcon)
         const count = counts?.[cat.value] ?? 0
         const isActive = cat.value === "all" ? !active : active === cat.value
 

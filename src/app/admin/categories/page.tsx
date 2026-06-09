@@ -11,6 +11,9 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
+  type DragMoveEvent,
+  type DragOverEvent,
 } from "@dnd-kit/core"
 import {
   SortableContext,
@@ -140,14 +143,17 @@ function SortableCard({ cat, index, total, onToggle, onDelete, onEdit, isDeletin
   onEdit: (cat: CategoryRow) => void
   isDeleting: boolean
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
+  const sortable = useSortable({ id: cat.id })
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = sortable
+
+  console.log("[SortableCard] render", cat.id, {
+    hasSortable: !!sortable,
+    hasAttr: !!attributes,
+    hasListeners: !!listeners,
+    hasRef: !!setNodeRef,
+    transform: CSS.Transform.toString(transform),
     isDragging,
-  } = useSortable({ id: cat.id })
+  })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -272,12 +278,29 @@ export default function AdminCategoriesPage() {
     setDeleting(null)
   }
 
+  console.log("[AdminCategoriesPage] isDesktop:", isDesktop, "innerWidth:", typeof window !== "undefined" ? window.innerWidth : "SSR")
+
+  const handleDragStart = (event: DragStartEvent) => {
+    console.log("[DnD] onDragStart active:", event.active.id, "active.data:", event.active.data.current)
+  }
+
+  const handleDragMove = (event: DragMoveEvent) => {
+    console.log("[DnD] onDragMove active:", event.active.id, "over:", event.over?.id ?? null)
+  }
+
+  const handleDragOver = (event: DragOverEvent) => {
+    console.log("[DnD] onDragOver active:", event.active.id, "over:", event.over?.id ?? null)
+  }
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
+    console.log("[DnD] onDragEnd active:", active.id, "over:", over?.id ?? null)
+    console.log("[DnD] categories state:", categories.map(c => ({ id: c.id, name: c.name, sortOrder: (c as any).sortOrder })))
     if (!over || active.id === over.id) return
 
     const oldIndex = categories.findIndex((c) => c.id === active.id)
     const newIndex = categories.findIndex((c) => c.id === over.id)
+    console.log("[DnD] oldIndex:", oldIndex, "newIndex:", newIndex)
     if (oldIndex === -1 || newIndex === -1) return
 
     const reordered = [...categories]
@@ -439,6 +462,9 @@ export default function AdminCategoriesPage() {
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragMove={handleDragMove}
+              onDragOver={handleDragOver}
               onDragEnd={handleDragEnd}
             >
               {isDesktop ? (

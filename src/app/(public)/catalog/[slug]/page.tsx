@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import { getProductBySlug, getProductsByCategory, getProductVideos } from "@/data/products"
 import { siteUrl } from "@/lib/url"
+import { breadcrumbJsonLd } from "@/lib/jsonld"
 import { ProductPageGallery } from "@/components/catalog/ProductPageGallery"
 import { ProductCard } from "@/components/catalog/ProductCard"
 import { ProductPageCTA } from "@/components/catalog/ProductPageCTA"
@@ -97,11 +98,21 @@ export default async function ProductPage({
       : undefined,
   }
 
+  const breadCrumbs = breadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: "Catalog", path: "/catalog" },
+    { name: product.title, path: `/catalog/${slug}` },
+  ])
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadCrumbs) }}
       />
 
       <article className="pb-28 md:pb-0">

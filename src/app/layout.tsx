@@ -3,6 +3,7 @@ import { Geist } from "next/font/google"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { AuthProvider } from "@/components/providers/AuthProvider"
+import { organizationJsonLd } from "@/lib/jsonld"
 import "./globals.css"
 
 const DEFAULT_OG_IMAGE =
@@ -58,6 +59,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`${geistSans.variable} h-full antialiased`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <AuthProvider>
           {children}

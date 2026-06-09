@@ -1,8 +1,28 @@
 import { db } from "@/db"
 import { products, productImages, categories } from "@/db/schema.pg"
-import { eq, desc, asc, and, or, lt, gt, inArray } from "drizzle-orm"
+import { eq, desc, asc, and, or, lt, gt, inArray, sql } from "drizzle-orm"
 import { randomUUID } from "crypto"
 import type { Product, ProductCategory } from "@/types"
+
+const PRODUCT_ORDER = [asc(products.sortOrder), desc(products.createdAt)]
+
+async function normalizeProductSortOrder(): Promise<void> {
+  const all = await db
+    .select({ id: products.id })
+    .from(products)
+    .orderBy(...PRODUCT_ORDER)
+
+  if (all.length === 0) return
+
+  await db.transaction(async (tx) => {
+    for (let i = 0; i < all.length; i++) {
+      await tx
+        .update(products)
+        .set({ sortOrder: i })
+        .where(eq(products.id, all[i].id))
+    }
+  })
+}
 
 export type ProductRow = typeof products.$inferSelect
 export type ProductImageRow = typeof productImages.$inferSelect
@@ -158,6 +178,7 @@ export async function deleteProductQuery(
   try {
     await db.delete(productImages).where(eq(productImages.productId, id))
     await db.delete(products).where(eq(products.id, id))
+    await normalizeProductSortOrder()
     return { success: true }
   } catch (err) {
     return {

@@ -1,5 +1,5 @@
 import { db } from "@/db"
-import { categories, products } from "@/db/schema"
+import { categories, products } from "@/db/schema.pg"
 import { eq } from "drizzle-orm"
 
 async function backfill() {

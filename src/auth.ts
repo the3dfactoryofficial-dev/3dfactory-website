@@ -1,7 +1,7 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import { db } from "@/db"
-import { users } from "@/db/schema"
+import { users } from "@/db/schema.pg"
 import { eq } from "drizzle-orm"
 
 const googleProvider = Google({

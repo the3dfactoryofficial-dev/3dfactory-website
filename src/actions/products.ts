@@ -4,7 +4,7 @@ import { randomUUID } from "crypto"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { auth } from "@/auth"
 import { db } from "@/db"
-import { categories } from "@/db/schema"
+import { categories } from "@/db/schema.pg"
 import { eq } from "drizzle-orm"
 import { CreateProductSchema, UpdateProductSchema, ToggleFeaturedSchema } from "@/lib/validation/product"
 import {

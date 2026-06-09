@@ -1,5 +1,5 @@
 import { db } from "@/db"
-import { categories } from "@/db/schema"
+import { categories } from "@/db/schema.pg"
 import { eq, asc, desc, or, lt, gt, and } from "drizzle-orm"
 import { randomUUID } from "crypto"
 
@@ -15,6 +15,7 @@ async function getCategoriesQuery(): Promise<Result<CategoryRow[]>> {
       .select()
       .from(categories)
       .orderBy(asc(categories.sortOrder))
+    console.log("[GET CATEGORIES]", rows.map((r) => ({ id: r.id.slice(0, 8), name: r.name, isActive: r.isActive, sortOrder: r.sortOrder })))
     return { success: true, data: rows }
   } catch (err) {
     return {
@@ -121,6 +122,15 @@ async function updateCategoryQuery(
   }>
 ): Promise<Result<CategoryRow>> {
   try {
+    console.log("[CATEGORY UPDATE]", { id, input })
+    const before = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.id, id))
+      .limit(1)
+      .then((r) => r[0] ?? null)
+    console.log("[CATEGORY UPDATE] BEFORE:", { id: before?.id, isActive: before?.isActive, sortOrder: before?.sortOrder })
+
     await db
       .update(categories)
       .set(input)
@@ -132,9 +142,11 @@ async function updateCategoryQuery(
       .where(eq(categories.id, id))
       .limit(1)
       .then((r) => r[0])
+    console.log("[CATEGORY UPDATE] AFTER:", { id: row?.id, isActive: row?.isActive, sortOrder: row?.sortOrder })
     if (!row) return { success: false, error: "Category not found" }
     return { success: true, data: row }
   } catch (err) {
+    console.error("[CATEGORY UPDATE] ERROR:", err)
     return {
       success: false,
       error: err instanceof Error ? err.message : "Failed to update category",
@@ -155,6 +167,7 @@ async function deleteCategoryQuery(id: string): Promise<Result<void>> {
 }
 
 async function toggleCategoryActiveQuery(id: string, current: boolean): Promise<Result<CategoryRow>> {
+  console.log("[TOGGLE] id:", id, "current:", current, "→ setting:", !current)
   return updateCategoryQuery(id, { isActive: !current })
 }
 

@@ -7,15 +7,11 @@ import * as pgSchema from "./schema.pg"
 
 // ── Supabase (production) ──
 const supabasePgClient = postgres(process.env.DATABASE_URL ?? "", { prepare: false })
-export const supabaseDb = drizzle(supabasePgClient, { schema: pgSchema })
-
-// ── Active db ──
-type SqliteDb = ReturnType<typeof drizzleSqlite>
-export const db = supabaseDb as unknown as SqliteDb
+export const db = drizzle(supabasePgClient, { schema: pgSchema })
 
 // ── Turso (legacy / rollback) — lazy: never created at module load ──
-let _tursoDb: SqliteDb | undefined
-export function getTursoDb(): SqliteDb {
+let _tursoDb: ReturnType<typeof drizzleSqlite> | undefined
+export function getTursoDb() {
   if (!_tursoDb) {
     const tursoClient = createClient({
       url: process.env.TURSO_DATABASE_URL ?? "",

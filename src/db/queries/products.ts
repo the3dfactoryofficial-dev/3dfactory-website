@@ -1,5 +1,5 @@
 import { db } from "@/db"
-import { products, productImages, categories } from "@/db/schema"
+import { products, productImages, categories } from "@/db/schema.pg"
 import { eq, desc, asc, and, or, lt, gt, inArray } from "drizzle-orm"
 import { randomUUID } from "crypto"
 import type { Product, ProductCategory } from "@/types"

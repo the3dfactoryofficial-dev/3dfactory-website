@@ -1,5 +1,5 @@
 import { db } from "@/db"
-import { inquiries } from "@/db/schema"
+import { inquiries } from "@/db/schema.pg"
 import { eq, desc } from "drizzle-orm"
 import { randomUUID } from "crypto"
 import type {

@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto"
 import { db } from "@/db"
-import { products, productImages } from "@/db/schema"
+import { products, productImages } from "@/db/schema.pg"
 import { staticProducts } from "@/data/products-static"
 
 async function seed() {

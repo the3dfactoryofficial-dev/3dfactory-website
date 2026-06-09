@@ -11,6 +11,7 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -115,7 +116,7 @@ function SortableProductRow({ product, onToggleFeatured, onEdit, onDelete, isDel
         <button
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground transition-colors p-1"
+          className="cursor-grab active:cursor-grabbing touch-action-none text-muted-foreground/40 hover:text-muted-foreground transition-colors p-1"
           aria-label="Drag to reorder"
         >
           <GripVertical className="w-4 h-4" />
@@ -223,7 +224,7 @@ function SortableProductCard({ product, onToggleFeatured, onEdit, onDelete, isDe
         <button
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground transition-colors shrink-0 p-1 mt-1"
+          className="cursor-grab active:cursor-grabbing touch-action-none text-muted-foreground/40 hover:text-muted-foreground transition-colors shrink-0 p-1 mt-1"
           aria-label="Drag to reorder"
         >
           <GripVertical className="w-4 h-4" />
@@ -302,6 +303,7 @@ export default function AdminProductsPage() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 

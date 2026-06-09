@@ -10,7 +10,7 @@ import {
   updateCategoryQuery,
   deleteCategoryQuery,
   toggleCategoryActiveQuery,
-  moveCategoryQuery,
+  reorderCategoriesQuery,
 } from "@/db/queries/categories"
 import type { CategoryRow } from "@/db/queries/categories"
 
@@ -129,9 +129,8 @@ export async function toggleCategoryActiveAction(
   return result
 }
 
-export async function moveCategoryAction(
-  id: string,
-  direction: "up" | "down"
+export async function reorderCategoriesAction(
+  categoryIdsInOrder: string[]
 ): Promise<{ success: true } | { success: false; error: string }> {
   try {
     const session = await auth()
@@ -140,7 +139,7 @@ export async function moveCategoryAction(
     return { success: false, error: err instanceof Error ? err.message : "Unauthorized" }
   }
 
-  const result = await moveCategoryQuery(id, direction)
+  const result = await reorderCategoriesQuery(categoryIdsInOrder)
   if (result.success) revalidateAll()
   return result
 }

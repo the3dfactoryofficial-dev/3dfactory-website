@@ -24,7 +24,7 @@ import {
   updateCategoryAction,
   deleteCategoryAction,
   toggleCategoryActiveAction,
-  moveCategoryAction,
+  reorderCategoriesAction,
 } from "@/actions/categories"
 import type { CategoryRow } from "@/db/queries/categories"
 import { cn } from "@/lib/utils"
@@ -266,16 +266,15 @@ export default function AdminCategoriesPage() {
     const newIndex = categories.findIndex((c) => c.id === over.id)
     if (oldIndex === -1 || newIndex === -1) return
 
-    const direction = newIndex > oldIndex ? "down" : "up"
+    const reordered = [...categories]
+    const [moved] = reordered.splice(oldIndex, 1)
+    reordered.splice(newIndex, 0, moved)
 
-    setCategories((prev) => {
-      const next = [...prev]
-      const [moved] = next.splice(oldIndex, 1)
-      next.splice(newIndex, 0, moved)
-      return next
-    })
+    setCategories(reordered)
 
-    const result = await moveCategoryAction(String(active.id), direction)
+    const result = await reorderCategoriesAction(
+      reordered.map((c) => c.id)
+    )
     if (!result.success) {
       await load()
     }

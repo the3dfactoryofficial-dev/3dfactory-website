@@ -26,7 +26,7 @@ import {
   getProductsAction,
   deleteProductAction,
   toggleFeaturedAction,
-  moveProductAction,
+  reorderProductsAction,
 } from "@/actions/products"
 import type { Product } from "@/types"
 import { PRODUCT_CATEGORIES } from "@/types"
@@ -365,16 +365,15 @@ export default function AdminProductsPage() {
     const newIndex = products.findIndex((p) => p.id === over.id)
     if (oldIndex === -1 || newIndex === -1) return
 
-    const direction = newIndex > oldIndex ? "down" : "up"
+    const reordered = [...products]
+    const [moved] = reordered.splice(oldIndex, 1)
+    reordered.splice(newIndex, 0, moved)
 
-    setProducts((prev) => {
-      const next = [...prev]
-      const [moved] = next.splice(oldIndex, 1)
-      next.splice(newIndex, 0, moved)
-      return next
-    })
+    setProducts(reordered)
 
-    const result = await moveProductAction(String(active.id), direction)
+    const result = await reorderProductsAction(
+      reordered.map((p) => p.id)
+    )
     if (!result.success) {
       loadProducts()
     }

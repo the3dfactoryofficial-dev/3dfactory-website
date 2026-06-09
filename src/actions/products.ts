@@ -14,7 +14,7 @@ import {
   getProductsQuery,
   getFeaturedProductsQuery,
   getProductByIdQuery,
-  moveProductQuery,
+  reorderProductsQuery,
 } from "@/db/queries/products"
 import type { Product } from "@/types"
 import { setProductVideosQuery, getProductVideosQuery } from "@/db/queries/videos"
@@ -240,9 +240,8 @@ export async function getFeaturedProductsAction(): Promise<
   return getFeaturedProductsQuery()
 }
 
-export async function moveProductAction(
-  productId: string,
-  direction: "up" | "down"
+export async function reorderProductsAction(
+  productIdsInOrder: string[]
 ): Promise<{ success: true } | { success: false; error: string }> {
   try {
     const session = await auth()
@@ -251,7 +250,7 @@ export async function moveProductAction(
     return { success: false, error: err instanceof Error ? err.message : "Unauthorized" }
   }
 
-  const result = await moveProductQuery(productId, direction)
+  const result = await reorderProductsQuery(productIdsInOrder)
   if (result.success) {
     revalidateAll()
   }

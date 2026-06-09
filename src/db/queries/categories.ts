@@ -185,39 +185,23 @@ async function toggleCategoryActiveQuery(id: string, current: boolean): Promise<
   return updateCategoryQuery(id, { isActive: !current })
 }
 
-async function moveCategoryQuery(
-  id: string,
-  direction: "up" | "down"
+async function reorderCategoriesQuery(
+  categoryIdsInOrder: string[]
 ): Promise<Result<void>> {
   try {
-    const all = await db
-      .select()
-      .from(categories)
-      .orderBy(...CATEGORY_ORDER)
-
-    const idx = all.findIndex((c) => c.id === id)
-    if (idx === -1) return { success: false, error: "Category not found" }
-
-    const swapIdx = direction === "up" ? idx - 1 : idx + 1
-    if (swapIdx < 0 || swapIdx >= all.length) return { success: true, data: undefined }
-
     await db.transaction(async (tx) => {
-      await tx
-        .update(categories)
-        .set({ sortOrder: all[swapIdx].sortOrder })
-        .where(eq(categories.id, all[idx].id))
-      await tx
-        .update(categories)
-        .set({ sortOrder: all[idx].sortOrder })
-        .where(eq(categories.id, all[swapIdx].id))
+      for (let i = 0; i < categoryIdsInOrder.length; i++) {
+        await tx
+          .update(categories)
+          .set({ sortOrder: i })
+          .where(eq(categories.id, categoryIdsInOrder[i]))
+      }
     })
-
-    await normalizeSortOrder()
     return { success: true, data: undefined }
   } catch (err) {
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Failed to move category",
+      error: err instanceof Error ? err.message : "Failed to reorder categories",
     }
   }
 }
@@ -231,5 +215,5 @@ export {
   updateCategoryQuery,
   deleteCategoryQuery,
   toggleCategoryActiveQuery,
-  moveCategoryQuery,
+  reorderCategoriesQuery,
 }

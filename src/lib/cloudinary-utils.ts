@@ -1,3 +1,5 @@
+// Legacy Cloudinary utilities — kept for backward compatibility with existing URLs.
+// New uploads go to Supabase Storage; optimizeImage passes non-Cloudinary URLs through unchanged.
 export {
   isCloudinaryUrl,
   optimizeCloudinaryUrl,

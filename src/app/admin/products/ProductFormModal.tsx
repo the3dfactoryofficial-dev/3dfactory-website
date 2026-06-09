@@ -3,12 +3,13 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useState, useRef, useEffect, useCallback, startTransition } from "react"
-import { X, Upload, Loader2, ChevronDown, ChevronRight, ImageIcon, Video, Settings, DollarSign, CheckCircle2, AlertCircle, FileImage } from "lucide-react"
+import { X, Upload, Loader2, ChevronDown, ChevronRight, ImageIcon, Video, Settings, DollarSign, CheckCircle2, AlertCircle, FileImage, CloudUpload } from "lucide-react"
 import {
   createProductAction,
   updateProductAction,
+  getProductVideosAction,
 } from "@/actions/products"
-import { uploadToCloudinaryWithProgress, type AbortableUpload } from "@/lib/cloudinary-upload"
+import { uploadToStorageWithProgress, type AbortableStorageUpload as AbortableUpload } from "@/lib/storage-upload"
 import { optimizeImage, getBlurBackgroundStyle } from "@/lib/cloudinary-utils"
 import { getCategoriesAction } from "@/actions/categories"
 import type { CategoryRow } from "@/db/queries/categories"
@@ -36,6 +37,19 @@ const selectClass =
     "w-full h-11 px-3.5 text-sm bg-surface border border-border rounded-xl text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all duration-200"
 
 const labelClass = "block text-xs font-medium text-muted-foreground mb-1.5"
+
+const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"]
+const MAX_VIDEO_MB = 100
+
+function validateVideoFileSize(file: File): { valid: boolean; error?: string } {
+  if (!ALLOWED_VIDEO_TYPES.includes(file.type)) {
+    return { valid: false, error: `Invalid video type. Allowed: MP4, WebM, MOV` }
+  }
+  if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+    return { valid: false, error: `Video too large (max ${MAX_VIDEO_MB}MB)` }
+  }
+  return { valid: true }
+}
 
 function SectionHeader({
   icon: Icon,
@@ -190,13 +204,15 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
   const [featuredImage, setFeaturedImage] = useState(product?.featuredImage ?? "")
   const [galleryImages, setGalleryImages] = useState<string[]>(product?.galleryImages ?? [])
   const [videos, setVideos] = useState<string[]>([])
+  const [videosLoaded, setVideosLoaded] = useState(!product)
   const [featuredUpload, setFeaturedUpload] = useState<UploadInfo>({ state: "idle", progress: 0 })
   const [galleryUploads, setGalleryUploads] = useState<Record<number, UploadInfo>>({})
+  const [videoUploads, setVideoUploads] = useState<Record<number, UploadInfo>>({})
   const [pendingGalleryCount, setPendingGalleryCount] = useState(0)
+  const galleryUploadCounter = useRef(0)
   const pendingFeaturedFile = useRef<File | null>(null)
   const mountedRef = useRef(true)
   const activeUploads = useRef<Map<string, AbortableUpload>>(new Map())
-  const uploadedPublicIds = useRef<string[]>([])
 
   const [sections, setSections] = useState({
     basic: true,
@@ -212,13 +228,22 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
     getCategoriesAction().then((result) => {
       if (result.success) setCategories(result.data)
     })
+    if (product) {
+      getProductVideosAction(product.id).then((result) => {
+        if (!mountedRef.current) return
+        if (result.success) {
+          setVideos(result.data.map((v) => v.videoUrl))
+        }
+        setVideosLoaded(true)
+      })
+    }
     return () => {
       mountedRef.current = false
       uploads.forEach((u) => u.abort())
       uploads.clear()
       unlockBodyScroll()
     }
-  }, [])
+  }, [product])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -275,6 +300,7 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
   const uploadFile = (file: File, target: "featured" | "gallery", index?: number) => {
     const slug = getSlug()
     const key = target === "featured" ? "featured" : `gallery-${index}`
+    const folder = target === "featured" ? "products" : "products/gallery"
 
     if (target === "featured") {
       setFeaturedUpload({ state: "preparing", progress: 0 })
@@ -282,9 +308,9 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
       setGalleryUploads((prev) => ({ ...prev, [index]: { state: "preparing", progress: 0 } }))
     }
 
-    const { promise, abort } = uploadToCloudinaryWithProgress(
+    const { promise, abort } = uploadToStorageWithProgress(
       file,
-      { slug, target },
+      { folder, mediaType: "image" },
       (pct) => {
         if (!mountedRef.current) return
         if (target === "featured") {
@@ -301,16 +327,16 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
       .then((result) => {
         if (!mountedRef.current) return
         activeUploads.current.delete(key)
-        uploadedPublicIds.current.push(result.publicId)
 
         if (target === "featured") {
-          setFeaturedImage(result.secureUrl)
+          setFeaturedImage(result.publicUrl)
           setFeaturedUpload({ state: "success", progress: 100 })
           setTimeout(() => {
             if (mountedRef.current) setFeaturedUpload({ state: "idle", progress: 0 })
           }, 2000)
         } else {
-          setGalleryImages((prev) => [...prev, result.secureUrl])
+          setGalleryImages((prev) => [...prev, result.publicUrl])
+          setPendingGalleryCount((prev) => Math.max(0, prev - 1))
           if (index !== undefined) {
             setGalleryUploads((prev) => ({ ...prev, [index]: { state: "success", progress: 100 } }))
             setTimeout(() => {
@@ -327,6 +353,7 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
       .catch((err) => {
         if (!mountedRef.current) return
         activeUploads.current.delete(key)
+        setPendingGalleryCount((prev) => Math.max(0, prev - 1))
         const msg = err instanceof Error ? err.message : "Upload failed"
         if (target === "featured") {
           setFeaturedUpload({ state: "error", progress: 0, error: msg })
@@ -345,10 +372,10 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
   }
 
   const handleGalleryFiles = (files: FileList) => {
-    const start = pendingGalleryCount
-    setPendingGalleryCount((prev) => prev + files.length)
     for (let i = 0; i < files.length; i++) {
-      uploadFile(files[i], "gallery", start + i)
+      const slot = galleryUploadCounter.current++
+      setPendingGalleryCount((prev) => prev + 1)
+      uploadFile(files[i], "gallery", slot)
     }
   }
 
@@ -361,9 +388,65 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
     setFeaturedUpload({ state: "idle", progress: 0 })
   }
 
+  const handleVideoUpload = (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ""
+
+    const validation = validateVideoFileSize(file)
+    if (!validation.valid) {
+      setVideoUploads((prev) => ({ ...prev, [index]: { state: "error", progress: 0, error: validation.error } }))
+      return
+    }
+
+    setVideoUploads((prev) => ({ ...prev, [index]: { state: "uploading", progress: 10 } }))
+
+    const key = `video-${index}`
+    const { promise, abort } = uploadToStorageWithProgress(
+      file,
+      { folder: "videos", mediaType: "video" },
+      (pct) => {
+        if (!mountedRef.current) return
+        setVideoUploads((prev) => ({ ...prev, [index]: { state: "uploading", progress: pct } }))
+      }
+    )
+
+    activeUploads.current.set(key, { promise, abort })
+
+    promise
+      .then((result) => {
+        if (!mountedRef.current) return
+        activeUploads.current.delete(key)
+        setVideos((prev) => {
+          const next = [...prev]
+          next[index] = result.publicUrl
+          return next
+        })
+        setVideoUploads((prev) => ({ ...prev, [index]: { state: "success", progress: 100 } }))
+        setTimeout(() => {
+          if (!mountedRef.current) return
+          setVideoUploads((prev) => {
+            const next = { ...prev }
+            delete next[index]
+            return next
+          })
+        }, 2000)
+      })
+      .catch((err) => {
+        if (!mountedRef.current) return
+        activeUploads.current.delete(key)
+        const msg = err instanceof Error ? err.message : "Upload failed"
+        setVideoUploads((prev) => ({ ...prev, [index]: { state: "error", progress: 0, error: msg } }))
+      })
+  }
+
   const isUploading =
     featuredUpload.state === "preparing" || featuredUpload.state === "uploading" ||
     Object.values(galleryUploads).some((u) => u.state === "preparing" || u.state === "uploading")
+
+  const videosPending = isEdit && !videosLoaded
+
+  const canSave = !saving && !isUploading && !videosPending
 
   const toggleSection = (key: keyof typeof sections) => {
     setSections((prev) => ({ ...prev, [key]: !prev[key] }))
@@ -550,35 +633,47 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
             {sections.videos && (
               <div className="space-y-2 px-4 sm:px-6 pb-4">
                 {videos.map((url, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={url}
-                      onChange={(e) => {
-                        const next = [...videos]
-                        next[i] = e.target.value
-                        setVideos(next)
-                      }}
-                      placeholder="https://res.cloudinary.com/..."
-                      className="flex-1 h-11 px-3.5 text-sm bg-surface border border-border rounded-xl text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all duration-200 font-mono text-xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setVideos((prev) => prev.filter((_, j) => j !== i))}
-                      className="h-11 w-11 sm:h-10 sm:w-10 inline-flex items-center justify-center rounded-xl bg-zinc-800 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all duration-200"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+                  <div key={i} className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      {url ? (
+                        <div className="flex-1 flex items-center gap-2 h-11 px-3 rounded-lg bg-zinc-800 border border-zinc-700">
+                          <Video className="w-4 h-4 text-primary shrink-0" />
+                          <span className="text-xs text-foreground truncate flex-1">{url.split("/").pop()}</span>
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        </div>
+                      ) : (
+                        <label className="flex-1 flex items-center justify-center gap-2 h-11 rounded-lg border-2 border-dashed border-border bg-surface text-muted-foreground hover:text-foreground hover:border-primary/50 cursor-pointer transition-all duration-200">
+                          <CloudUpload className="w-4 h-4" />
+                          <span className="text-xs font-medium">Choose MP4</span>
+                          <input type="file" accept="video/mp4,video/webm,video/quicktime" className="hidden" onChange={handleVideoUpload(i)} />
+                        </label>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setVideos((prev) => prev.filter((_, j) => j !== i))}
+                        className="h-11 w-11 inline-flex items-center justify-center rounded-lg bg-zinc-800 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all duration-200"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    {videoUploads[i]?.state === "uploading" && <ProgressBar value={videoUploads[i].progress} />}
+                    {videoUploads[i]?.state === "error" && (
+                      <div className="flex items-center gap-1.5 text-xs text-red-400">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        {videoUploads[i].error || "Upload failed"}
+                      </div>
+                    )}
                   </div>
                 ))}
                 <button
                   type="button"
                   onClick={() => setVideos((prev) => [...prev, ""])}
-                  className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border-2 border-dashed border-border bg-surface text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all duration-200 text-sm"
+                  className="flex items-center justify-center gap-2 w-full h-11 rounded-lg border-2 border-dashed border-border bg-surface text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all duration-200 text-sm"
                 >
                   <Upload className="w-4 h-4" />
-                  Add Video URL
+                  Add Video
                 </button>
+                <p className="text-[11px] text-muted-foreground/50">MP4, WebM, or MOV · Max 100MB</p>
               </div>
             )}
 
@@ -690,13 +785,13 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
             </button>
             <button
               type="submit"
-              disabled={saving || isUploading}
+              disabled={!canSave}
               className="h-11 sm:h-10 px-5 text-sm font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary-hover active:scale-[0.97] transition-all duration-200 disabled:opacity-50 inline-flex items-center gap-2"
             >
-              {(saving || isUploading) && (
+              {(saving || isUploading || videosPending) && (
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               )}
-              {isEdit ? "Update Product" : "Create Product"}
+              {videosPending ? "Loading..." : isEdit ? "Update Product" : "Create Product"}
             </button>
           </div>
         </form>

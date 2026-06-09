@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect, startTransition, useCallback, useMemo } from "react"
+import { useState, useEffect, useRef, startTransition, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Plus, Pencil, Trash2, Star, Quote } from "lucide-react"
+import { Plus, Pencil, Trash2, Star, Quote, Upload, X, Loader2, CheckCircle2, AlertCircle } from "lucide-react"
 import {
   getTestimonialsAction,
   createTestimonialAction,
@@ -99,6 +99,49 @@ export default function AdminTestimonialsPage() {
     refresh()
   }
 
+  const [imageUploading, setImageUploading] = useState(false)
+  const [imageError, setImageError] = useState("")
+  const [imageUrl, setImageUrl] = useState("")
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ""
+
+    const allowed = ["image/jpeg", "image/png", "image/webp", "image/avif"]
+    if (!allowed.includes(file.type)) {
+      setImageError("Invalid image type. Allowed: JPEG, PNG, WebP, AVIF")
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setImageError("Image too large (max 5MB)")
+      return
+    }
+
+    setImageUploading(true)
+    setImageError("")
+
+    const formData = new FormData()
+    formData.append("file", file)
+    formData.append("folder", "testimonials")
+    formData.append("mediaType", "image")
+
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: formData })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error ?? "Upload failed")
+      }
+      const result = await res.json()
+      setImageUrl(result.publicUrl)
+    } catch (err) {
+      setImageError(err instanceof Error ? err.message : "Upload failed")
+    } finally {
+      setImageUploading(false)
+    }
+  }
+
   const featuredCount = useMemo(() => testimonials.filter((t) => t.featured).length, [testimonials])
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -108,6 +151,7 @@ export default function AdminTestimonialsPage() {
     const form = e.currentTarget
     const fd = new FormData(form)
     if (editing) fd.set("id", editing.id)
+    fd.set("imageUrl", imageUrl)
     const result = editing
       ? await updateTestimonialAction(fd)
       : await createTestimonialAction(fd)
@@ -118,6 +162,7 @@ export default function AdminTestimonialsPage() {
     }
     setShowForm(false)
     setEditing(null)
+    setImageUrl("")
     refresh()
   }
 
@@ -133,10 +178,12 @@ export default function AdminTestimonialsPage() {
             </p>
           </div>
           <button
-            onClick={() => {
-              setEditing(null)
-              setShowForm(!showForm)
-            }}
+onClick={() => {
+            setEditing(null)
+            setImageUrl("")
+            setImageError("")
+            setShowForm(!showForm)
+          }}
             className="h-11 px-4 text-sm font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary-hover active:scale-[0.97] transition-all duration-200 inline-flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
@@ -198,14 +245,49 @@ export default function AdminTestimonialsPage() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                  Image URL
+                  Photo
                 </label>
-                <input
-                  name="imageUrl"
-                  defaultValue={editing?.imageUrl ?? ""}
-                  placeholder="/images/avatar.jpg"
-                  className="w-full h-11 px-3.5 text-sm bg-surface border border-border rounded-xl text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all"
-                />
+                {imageUrl ? (
+                  <div className="flex items-center gap-3">
+                    <img src={imageUrl} alt="Avatar preview" className="w-12 h-12 rounded-full object-cover border border-border" />
+                    <button
+                      type="button"
+                      onClick={() => setImageUrl("")}
+                      className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex items-center justify-center gap-2 w-full h-20 rounded-xl border-2 border-dashed border-border bg-surface text-muted-foreground hover:text-foreground hover:border-primary/50 cursor-pointer transition-all duration-200">
+                    {imageUploading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-xs">Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" />
+                        <span className="text-xs">Upload Photo</span>
+                      </>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/avif"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                      disabled={imageUploading}
+                    />
+                  </label>
+                )}
+                {imageError && (
+                  <div className="flex items-center gap-1.5 mt-1.5 text-xs text-red-400">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    {imageError}
+                  </div>
+                )}
+                <input type="hidden" name="imageUrl" value={imageUrl} />
               </div>
               <div className="flex items-end pb-1.5">
                 <label className="flex items-center gap-2.5 h-11 px-3.5 rounded-xl bg-surface border border-border cursor-pointer hover:bg-zinc-900 transition-colors w-full">
@@ -227,7 +309,7 @@ export default function AdminTestimonialsPage() {
             <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
               <button
                 type="button"
-                onClick={() => { setShowForm(false); setEditing(null) }}
+                onClick={() => { setShowForm(false); setEditing(null); setImageUrl(""); setImageError("") }}
                 className="h-11 px-5 text-sm font-medium rounded-xl bg-zinc-800 text-foreground hover:bg-zinc-700 active:scale-[0.97] transition-all duration-200"
               >
                 Cancel
@@ -314,8 +396,8 @@ export default function AdminTestimonialsPage() {
                       <td className="px-5 py-4">
                         <div className="flex items-center justify-end gap-1">
                           <button
-                            onClick={() => { setEditing(t); setShowForm(true) }}
-                            className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200"
+onClick={() => { setEditing(t); setImageUrl(t.imageUrl); setImageError(""); setShowForm(true) }}
+                             className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200"
                             title="Edit"
                           >
                             <Pencil className="w-4 h-4" />
@@ -367,7 +449,7 @@ export default function AdminTestimonialsPage() {
                     >
                       <Star className={cn("w-4 h-4", t.featured && "fill-amber-400")} />
                     </button>
-                    <button onClick={() => { setEditing(t); setShowForm(true) }} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 border border-border/50"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => { setEditing(t); setImageUrl(t.imageUrl); setImageError(""); setShowForm(true) }} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 border border-border/50"><Pencil className="w-4 h-4" /></button>
                     <button onClick={() => handleDelete(t.id)} disabled={deleting === t.id} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all duration-200 border border-border/50 disabled:opacity-50"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </div>

@@ -17,7 +17,9 @@ import {
   moveProductQuery,
 } from "@/db/queries/products"
 import type { Product } from "@/types"
-import { setProductVideosQuery } from "@/db/queries/videos"
+import { setProductVideosQuery, getProductVideosQuery } from "@/db/queries/videos"
+import type { ProductVideo } from "@/db/queries/videos"
+import { deleteMultipleFromStorage, extractStoragePath } from "@/lib/supabase-storage"
 
 async function resolveCategoryFromId(
   raw: Record<string, unknown>
@@ -168,6 +170,37 @@ export async function deleteProductAction(
     return { success: false, error: err instanceof Error ? err.message : "Unauthorized" }
   }
 
+  const productResult = await getProductByIdQuery(id)
+  if (productResult.success && productResult.data) {
+    const paths: string[] = []
+    const p = productResult.data as Product & { images?: { imageUrl: string }[] }
+
+    if (p.featuredImage) {
+      const fp = extractStoragePath(p.featuredImage)
+      if (fp) paths.push(fp)
+    }
+
+    if (p.galleryImages && Array.isArray(p.galleryImages)) {
+      for (const img of p.galleryImages) {
+        const url = typeof img === "string" ? img : (img as { imageUrl: string }).imageUrl
+        const sp = extractStoragePath(url)
+        if (sp) paths.push(sp)
+      }
+    }
+
+    const vidsResult = await getProductVideosQuery(id)
+    if (vidsResult.success) {
+      for (const v of vidsResult.data) {
+        const vp = extractStoragePath(v.videoUrl)
+        if (vp) paths.push(vp)
+      }
+    }
+
+    if (paths.length > 0) {
+      await deleteMultipleFromStorage(paths).catch(() => {})
+    }
+  }
+
   const result = await deleteProductQuery(id)
   if (result.success) {
     revalidateAll(slug)
@@ -223,4 +256,16 @@ export async function moveProductAction(
     revalidateAll()
   }
   return result
+}
+
+export async function getProductVideosAction(productId: string): Promise<
+  { success: true; data: ProductVideo[] } | { success: false; error: string }
+> {
+  try {
+    const session = await auth()
+    if (!session?.user?.isAdmin) throw new Error("Unauthorized")
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : "Unauthorized" }
+  }
+  return getProductVideosQuery(productId)
 }

@@ -10,6 +10,8 @@ export function getBlurUrl(imageUrl: string): string | null {
       effects: ["e_blur:1000"],
     })
   }
+  // For Supabase Storage URLs and local paths, no server-side blur available.
+  // Next.js Image component handles optimization for these.
   return null
 }
 

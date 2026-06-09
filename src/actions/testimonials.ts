@@ -2,6 +2,9 @@
 
 import { revalidatePath, revalidateTag } from "next/cache"
 import { auth } from "@/auth"
+import { db } from "@/db"
+import { testimonials } from "@/db/schema.pg"
+import { eq } from "drizzle-orm"
 import {
   createTestimonialQuery,
   updateTestimonialQuery,
@@ -10,6 +13,7 @@ import {
   getFeaturedTestimonialsQuery,
 } from "@/db/queries/testimonials"
 import { CreateTestimonialSchema, UpdateTestimonialSchema } from "@/lib/validation/testimonial"
+import { deleteFromStorage, extractStoragePath } from "@/lib/supabase-storage"
 
 function revalidateAll() {
   revalidateTag("testimonials", "max")
@@ -83,6 +87,19 @@ export async function deleteTestimonialAction(id: string) {
     if (!session?.user?.isAdmin) throw new Error("Unauthorized")
   } catch (err) {
     return { success: false as const, error: err instanceof Error ? err.message : "Unauthorized" }
+  }
+
+  try {
+    const rows = await db.select({ imageUrl: testimonials.imageUrl }).from(testimonials).where(eq(testimonials.id, id)).limit(1)
+    const oldImageUrl = rows[0]?.imageUrl
+    if (oldImageUrl) {
+      const storagePath = extractStoragePath(oldImageUrl)
+      if (storagePath) {
+        await deleteFromStorage(storagePath).catch(() => {})
+      }
+    }
+  } catch {
+    // Storage/file cleanup failure must not block DB deletion
   }
 
   const result = await deleteTestimonialQuery(id)

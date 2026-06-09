@@ -5,7 +5,7 @@ import { X, MessageCircle, Minus, Plus, Loader2, Paperclip } from "lucide-react"
 import { SITE } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 import { createInquiryAction } from "@/actions/inquiries"
-import { uploadToCloudinary } from "@/lib/cloudinary-upload"
+import { uploadToStorage } from "@/lib/storage-upload"
 import { trackInquirySubmit, trackWhatsAppClick } from "@/lib/analytics"
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/ui/scroll-lock"
 
@@ -109,8 +109,8 @@ export function QuickInquiry({
     setUploading(true)
     setError("")
     try {
-      const result = await uploadToCloudinary(file)
-      setAttachments((prev) => [...prev, result.secureUrl])
+      const result = await uploadToStorage(file, { folder: "inquiries", mediaType: "image" })
+      setAttachments((prev) => [...prev, result.publicUrl])
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed")
     } finally {

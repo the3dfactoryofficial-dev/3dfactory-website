@@ -19,7 +19,7 @@ export async function generateMetadata({
   const product = await getProductBySlug(slug)
   if (!product) return {}
 
-  const title = `${product.title} | 3D Factory`
+  const title = product.title
   const description =
     product.shortDescription ||
     `Premium custom 3D printed ${product.category.replace("-", " ")} crafted with ${product.material || "high-quality materials"}.`
@@ -335,6 +335,7 @@ export default async function ProductPage({
                     <video
                       src={v.videoUrl}
                       poster={v.thumbnailUrl || undefined}
+                      controls
                       autoPlay
                       muted
                       loop

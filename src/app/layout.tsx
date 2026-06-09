@@ -7,6 +7,7 @@ import { organizationJsonLd } from "@/lib/jsonld"
 import "./globals.css"
 
 const DEFAULT_OG_IMAGE =
+  process.env.NEXT_PUBLIC_DEFAULT_OG_IMAGE ??
   "https://res.cloudinary.com/dxfendyyq/image/upload/q_auto,f_auto/v1/3dfactory/products/ozyr7yuseyrvqhynaqm"
 
 const geistSans = Geist({

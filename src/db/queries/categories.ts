@@ -1,6 +1,6 @@
 import { db } from "@/db"
 import { categories } from "@/db/schema.pg"
-import { eq, asc, desc, sql } from "drizzle-orm"
+import { eq, asc, sql } from "drizzle-orm"
 import { randomUUID } from "crypto"
 
 export type CategoryRow = typeof categories.$inferSelect

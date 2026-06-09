@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Tag, Eye, EyeOff } from "lucide-react"
 import {
   getCategoriesAction,
@@ -34,7 +34,8 @@ export default function AdminCategoriesPage() {
   const [editing, setEditing] = useState<CategoryRow | null>(null)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
-  const [moving, setMoving] = useState<string | null>(null)
+  const [movingId, setMovingId] = useState<string | null>(null)
+  const loadTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const load = useCallback(async () => {
     setError("")
@@ -49,6 +50,17 @@ export default function AdminCategoriesPage() {
   }, [])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    return () => {
+      if (loadTimer.current) clearTimeout(loadTimer.current)
+    }
+  }, [])
+
+  const scheduleReload = useCallback(() => {
+    if (loadTimer.current) clearTimeout(loadTimer.current)
+    loadTimer.current = setTimeout(() => { load() }, 2000)
+  }, [load])
 
   const handleToggleActive = async (id: string, current: boolean) => {
     setCategories((prev) =>
@@ -74,24 +86,23 @@ export default function AdminCategoriesPage() {
   }
 
   const handleMove = async (id: string, direction: "up" | "down") => {
-    const currentList = [...categories]
-    const idx = currentList.findIndex((c) => c.id === id)
-    if (idx === -1) return
-    const swapIdx = direction === "up" ? idx - 1 : idx + 1
-    if (swapIdx < 0 || swapIdx >= currentList.length) return
+    setCategories((prev) => {
+      const next = [...prev]
+      const idx = next.findIndex((c) => c.id === id)
+      if (idx === -1) return prev
+      const swapIdx = direction === "up" ? idx - 1 : idx + 1
+      if (swapIdx < 0 || swapIdx >= next.length) return prev
+      ;[next[idx], next[swapIdx]] = [next[swapIdx], next[idx]]
+      return next
+    })
 
-    setMoving(id)
-    const optimistic = [...currentList]
-    ;[optimistic[idx], optimistic[swapIdx]] = [optimistic[swapIdx], optimistic[idx]]
-    setCategories(optimistic)
-
+    setMovingId(id)
     const result = await moveCategoryAction(id, direction)
     if (!result.success) {
-      setCategories(currentList)
-    } else {
       await load()
     }
-    setMoving(null)
+    setMovingId(null)
+    scheduleReload()
   }
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -247,113 +258,119 @@ export default function AdminCategoriesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {categories.map((cat, index) => (
-                    <tr key={cat.id} className="border-b border-border/50 hover:bg-surface/30 transition-colors last:border-0">
-                      <td className="px-5 py-4">
-                        <p className="text-foreground font-medium">{cat.name}</p>
-                      </td>
-                      <td className="px-5 py-4">
-                        <code className="text-xs text-muted-foreground">/{cat.slug}</code>
-                      </td>
-                      <td className="px-5 py-4">
-                        <p className="text-xs text-muted-foreground line-clamp-2 max-w-[250px]">
-                          {cat.description || "\u2014"}
-                        </p>
-                      </td>
-                      <td className="px-5 py-4">
-                        <button
-                          onClick={() => handleToggleActive(cat.id, cat.isActive)}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-full border transition-colors",
-                            cat.isActive
-                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                              : "bg-zinc-800 text-zinc-500 border-zinc-700 hover:text-zinc-300"
-                          )}
-                        >
-                          {cat.isActive ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                          {cat.isActive ? "Active" : "Inactive"}
-                        </button>
-                      </td>
-                      <td className="px-5 py-4 text-xs text-muted-foreground">
-                        {cat.sortOrder}
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center justify-end gap-1">
+                  {categories.map((cat, index) => {
+                    const isMoving = movingId === cat.id
+                    return (
+                      <tr key={cat.id} className={cn("border-b border-border/50 hover:bg-surface/30 transition-colors last:border-0", isMoving && "opacity-60")}>
+                        <td className="px-5 py-4">
+                          <p className="text-foreground font-medium">{cat.name}</p>
+                        </td>
+                        <td className="px-5 py-4">
+                          <code className="text-xs text-muted-foreground">/{cat.slug}</code>
+                        </td>
+                        <td className="px-5 py-4">
+                          <p className="text-xs text-muted-foreground line-clamp-2 max-w-[250px]">
+                            {cat.description || "\u2014"}
+                          </p>
+                        </td>
+                        <td className="px-5 py-4">
                           <button
-                            onClick={() => handleMove(cat.id, "up")}
-                            disabled={index === 0 || moving !== null}
-                            className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 disabled:opacity-30 disabled:pointer-events-none"
-                            title="Move up"
+                            onClick={() => handleToggleActive(cat.id, cat.isActive)}
+                            className={cn(
+                              "inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-full border transition-colors",
+                              cat.isActive
+                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                                : "bg-zinc-800 text-zinc-500 border-zinc-700 hover:text-zinc-300"
+                            )}
                           >
-                            <ArrowUp className="w-4 h-4" />
+                            {cat.isActive ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                            {cat.isActive ? "Active" : "Inactive"}
                           </button>
-                          <button
-                            onClick={() => handleMove(cat.id, "down")}
-                            disabled={index === categories.length - 1 || moving !== null}
-                            className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 disabled:opacity-30 disabled:pointer-events-none"
-                            title="Move down"
-                          >
-                            <ArrowDown className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => { setEditing(cat); setShowForm(true) }}
-                            className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200"
-                            title="Edit"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(cat.id)}
-                            disabled={deleting === cat.id}
-                            className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all duration-200 disabled:opacity-50"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-5 py-4 text-xs text-muted-foreground">
+                          {cat.sortOrder}
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => handleMove(cat.id, "up")}
+                              disabled={index === 0 || isMoving}
+                              className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 disabled:opacity-30 disabled:pointer-events-none"
+                              title="Move up"
+                            >
+                              <ArrowUp className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleMove(cat.id, "down")}
+                              disabled={index === categories.length - 1 || isMoving}
+                              className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 disabled:opacity-30 disabled:pointer-events-none"
+                              title="Move down"
+                            >
+                              <ArrowDown className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => { setEditing(cat); setShowForm(true) }}
+                              className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200"
+                              title="Edit"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(cat.id)}
+                              disabled={deleting === cat.id}
+                              className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all duration-200 disabled:opacity-50"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
 
             {/* Mobile cards */}
             <div className="md:hidden space-y-3">
-              {categories.map((cat, index) => (
-                <div key={cat.id} className="rounded-2xl bg-surface border border-border p-4">
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-foreground truncate">{cat.name}</p>
-                      <code className="text-xs text-muted-foreground">/{cat.slug}</code>
+              {categories.map((cat, index) => {
+                const isMoving = movingId === cat.id
+                return (
+                  <div key={cat.id} className={cn("rounded-2xl bg-surface border border-border p-4 transition-opacity", isMoving && "opacity-60")}>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-foreground truncate">{cat.name}</p>
+                        <code className="text-xs text-muted-foreground">/{cat.slug}</code>
+                      </div>
+                      <button
+                        onClick={() => handleToggleActive(cat.id, cat.isActive)}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-full border transition-colors shrink-0",
+                          cat.isActive
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                            : "bg-zinc-800 text-zinc-500 border-zinc-700"
+                        )}
+                      >
+                        {cat.isActive ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                        {cat.isActive ? "Active" : "Inactive"}
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleToggleActive(cat.id, cat.isActive)}
-                      className={cn(
-                        "inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-full border transition-colors shrink-0",
-                        cat.isActive
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                          : "bg-zinc-800 text-zinc-500 border-zinc-700"
-                      )}
-                    >
-                      {cat.isActive ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                      {cat.isActive ? "Active" : "Inactive"}
-                    </button>
-                  </div>
-                  {cat.description && (
-                    <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{cat.description}</p>
-                  )}
-                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
-                    <span className="text-xs text-muted-foreground">Order: {cat.sortOrder}</span>
-                    <div className="flex gap-1.5">
-                      <button onClick={() => handleMove(cat.id, "up")} disabled={index === 0 || moving !== null} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 border border-border/50 disabled:opacity-30 disabled:pointer-events-none" title="Move up"><ArrowUp className="w-4 h-4" /></button>
-                      <button onClick={() => handleMove(cat.id, "down")} disabled={index === categories.length - 1 || moving !== null} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 border border-border/50 disabled:opacity-30 disabled:pointer-events-none" title="Move down"><ArrowDown className="w-4 h-4" /></button>
-                      <button onClick={() => { setEditing(cat); setShowForm(true) }} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 border border-border/50"><Pencil className="w-4 h-4" /></button>
-                      <button onClick={() => handleDelete(cat.id)} disabled={deleting === cat.id} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all duration-200 border border-border/50 disabled:opacity-50"><Trash2 className="w-4 h-4" /></button>
+                    {cat.description && (
+                      <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{cat.description}</p>
+                    )}
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
+                      <span className="text-xs text-muted-foreground">Order: {cat.sortOrder}</span>
+                      <div className="flex gap-1.5">
+                        <button onClick={() => handleMove(cat.id, "up")} disabled={index === 0 || isMoving} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 border border-border/50 disabled:opacity-30 disabled:pointer-events-none" title="Move up"><ArrowUp className="w-4 h-4" /></button>
+                        <button onClick={() => handleMove(cat.id, "down")} disabled={index === categories.length - 1 || isMoving} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 border border-border/50 disabled:opacity-30 disabled:pointer-events-none" title="Move down"><ArrowDown className="w-4 h-4" /></button>
+                        <button onClick={() => { setEditing(cat); setShowForm(true) }} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 border border-border/50"><Pencil className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(cat.id)} disabled={deleting === cat.id} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all duration-200 border border-border/50 disabled:opacity-50"><Trash2 className="w-4 h-4" /></button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </>
         )}

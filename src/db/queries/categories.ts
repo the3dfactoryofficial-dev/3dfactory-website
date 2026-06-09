@@ -1,6 +1,6 @@
 import { db } from "@/db"
 import { categories } from "@/db/schema.pg"
-import { eq, asc, desc, or, lt, gt, and } from "drizzle-orm"
+import { eq, asc, desc, sql } from "drizzle-orm"
 import { randomUUID } from "crypto"
 
 export type CategoryRow = typeof categories.$inferSelect
@@ -9,13 +9,32 @@ type Result<T> =
   | { success: true; data: T }
   | { success: false; error: string }
 
+const CATEGORY_ORDER = [asc(categories.sortOrder), asc(categories.createdAt)]
+
+async function normalizeSortOrder(): Promise<void> {
+  const all = await db
+    .select({ id: categories.id })
+    .from(categories)
+    .orderBy(...CATEGORY_ORDER)
+
+  if (all.length === 0) return
+
+  await db.transaction(async (tx) => {
+    for (let i = 0; i < all.length; i++) {
+      await tx
+        .update(categories)
+        .set({ sortOrder: i })
+        .where(eq(categories.id, all[i].id))
+    }
+  })
+}
+
 async function getCategoriesQuery(): Promise<Result<CategoryRow[]>> {
   try {
     const rows = await db
       .select()
       .from(categories)
-      .orderBy(asc(categories.sortOrder))
-    console.log("[GET CATEGORIES]", rows.map((r) => ({ id: r.id.slice(0, 8), name: r.name, isActive: r.isActive, sortOrder: r.sortOrder })))
+      .orderBy(...CATEGORY_ORDER)
     return { success: true, data: rows }
   } catch (err) {
     return {
@@ -31,7 +50,7 @@ async function getActiveCategoriesQuery(): Promise<Result<CategoryRow[]>> {
       .select()
       .from(categories)
       .where(eq(categories.isActive, true))
-      .orderBy(asc(categories.sortOrder))
+      .orderBy(...CATEGORY_ORDER)
     return { success: true, data: rows }
   } catch (err) {
     return {
@@ -85,14 +104,20 @@ async function createCategoryQuery(input: {
   isActive: boolean
 }): Promise<Result<CategoryRow>> {
   try {
+    const maxResult = await db
+      .select({ maxSort: sql<number>`coalesce(max(${categories.sortOrder}), -1) + 1` })
+      .from(categories)
+      .then((r) => r[0])
+
     const id = randomUUID()
     const now = new Date().toISOString()
+    const sortOrder = maxResult?.maxSort ?? 0
     await db.insert(categories).values({
       id,
       name: input.name,
       slug: input.slug,
       description: input.description,
-      sortOrder: input.sortOrder,
+      sortOrder,
       isActive: input.isActive,
       createdAt: now,
     })
@@ -122,15 +147,6 @@ async function updateCategoryQuery(
   }>
 ): Promise<Result<CategoryRow>> {
   try {
-    console.log("[CATEGORY UPDATE]", { id, input })
-    const before = await db
-      .select()
-      .from(categories)
-      .where(eq(categories.id, id))
-      .limit(1)
-      .then((r) => r[0] ?? null)
-    console.log("[CATEGORY UPDATE] BEFORE:", { id: before?.id, isActive: before?.isActive, sortOrder: before?.sortOrder })
-
     await db
       .update(categories)
       .set(input)
@@ -142,11 +158,9 @@ async function updateCategoryQuery(
       .where(eq(categories.id, id))
       .limit(1)
       .then((r) => r[0])
-    console.log("[CATEGORY UPDATE] AFTER:", { id: row?.id, isActive: row?.isActive, sortOrder: row?.sortOrder })
     if (!row) return { success: false, error: "Category not found" }
     return { success: true, data: row }
   } catch (err) {
-    console.error("[CATEGORY UPDATE] ERROR:", err)
     return {
       success: false,
       error: err instanceof Error ? err.message : "Failed to update category",
@@ -157,6 +171,7 @@ async function updateCategoryQuery(
 async function deleteCategoryQuery(id: string): Promise<Result<void>> {
   try {
     await db.delete(categories).where(eq(categories.id, id))
+    await normalizeSortOrder()
     return { success: true, data: undefined }
   } catch (err) {
     return {
@@ -167,7 +182,6 @@ async function deleteCategoryQuery(id: string): Promise<Result<void>> {
 }
 
 async function toggleCategoryActiveQuery(id: string, current: boolean): Promise<Result<CategoryRow>> {
-  console.log("[TOGGLE] id:", id, "current:", current, "→ setting:", !current)
   return updateCategoryQuery(id, { isActive: !current })
 }
 
@@ -176,38 +190,29 @@ async function moveCategoryQuery(
   direction: "up" | "down"
 ): Promise<Result<void>> {
   try {
-    const current = await db
-      .select({ id: categories.id, sortOrder: categories.sortOrder })
+    const all = await db
+      .select()
       .from(categories)
-      .where(eq(categories.id, id))
-      .limit(1)
-      .then((r) => r[0])
+      .orderBy(...CATEGORY_ORDER)
 
-    if (!current) return { success: false, error: "Category not found" }
+    const idx = all.findIndex((c) => c.id === id)
+    if (idx === -1) return { success: false, error: "Category not found" }
 
-    const adjacent = direction === "up"
-      ? await db
-          .select({ id: categories.id, sortOrder: categories.sortOrder })
-          .from(categories)
-          .where(lt(categories.sortOrder, current.sortOrder))
-          .orderBy(desc(categories.sortOrder))
-          .limit(1)
-          .then((r) => r[0])
-      : await db
-          .select({ id: categories.id, sortOrder: categories.sortOrder })
-          .from(categories)
-          .where(gt(categories.sortOrder, current.sortOrder))
-          .orderBy(asc(categories.sortOrder))
-          .limit(1)
-          .then((r) => r[0])
-
-    if (!adjacent) return { success: true, data: undefined }
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1
+    if (swapIdx < 0 || swapIdx >= all.length) return { success: true, data: undefined }
 
     await db.transaction(async (tx) => {
-      await tx.update(categories).set({ sortOrder: adjacent.sortOrder }).where(eq(categories.id, current.id))
-      await tx.update(categories).set({ sortOrder: current.sortOrder }).where(eq(categories.id, adjacent.id))
+      await tx
+        .update(categories)
+        .set({ sortOrder: all[swapIdx].sortOrder })
+        .where(eq(categories.id, all[idx].id))
+      await tx
+        .update(categories)
+        .set({ sortOrder: all[idx].sortOrder })
+        .where(eq(categories.id, all[swapIdx].id))
     })
 
+    await normalizeSortOrder()
     return { success: true, data: undefined }
   } catch (err) {
     return {

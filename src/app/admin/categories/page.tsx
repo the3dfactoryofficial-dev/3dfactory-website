@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect, startTransition, useCallback, useMemo } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect, useCallback } from "react"
 import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Tag, Eye, EyeOff } from "lucide-react"
 import {
   getCategoriesAction,
@@ -28,7 +27,6 @@ function formatDate(iso: string): string {
 }
 
 export default function AdminCategoriesPage() {
-  const router = useRouter()
   const [categories, setCategories] = useState<CategoryRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -36,47 +34,64 @@ export default function AdminCategoriesPage() {
   const [editing, setEditing] = useState<CategoryRow | null>(null)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [moving, setMoving] = useState<string | null>(null)
 
-  const load = async () => {
-    startTransition(() => { setLoading(true); setError("") })
+  const load = useCallback(async () => {
+    setError("")
     const result = await getCategoriesAction()
-    startTransition(() => {
-      if (result.success) setCategories(result.data)
-      else setError(result.error)
+    if (result.success) {
+      setCategories(result.data)
       setLoading(false)
-    })
-  }
+    } else {
+      setError(result.error)
+      setLoading(false)
+    }
+  }, [])
 
-  const refresh = useCallback(() => {
-    router.refresh()
-    load()
-  }, [router])
-
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [load])
 
   const handleToggleActive = async (id: string, current: boolean) => {
     setCategories((prev) =>
       prev.map((c) => (c.id === id ? { ...c, isActive: !current } : c))
     )
     const result = await toggleCategoryActiveAction(id, current)
-    if (!result.success) load()
-    refresh()
+    if (!result.success) {
+      setCategories((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, isActive: current } : c))
+      )
+    }
   }
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this category? Products using it will have their category_id set to null.")) return
     setDeleting(id)
+    setCategories((prev) => prev.filter((c) => c.id !== id))
     const result = await deleteCategoryAction(id)
-    if (result.success) {
-      setCategories((prev) => prev.filter((c) => c.id !== id))
-      refresh()
+    if (!result.success) {
+      await load()
     }
     setDeleting(null)
   }
 
   const handleMove = async (id: string, direction: "up" | "down") => {
+    const currentList = [...categories]
+    const idx = currentList.findIndex((c) => c.id === id)
+    if (idx === -1) return
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1
+    if (swapIdx < 0 || swapIdx >= currentList.length) return
+
+    setMoving(id)
+    const optimistic = [...currentList]
+    ;[optimistic[idx], optimistic[swapIdx]] = [optimistic[swapIdx], optimistic[idx]]
+    setCategories(optimistic)
+
     const result = await moveCategoryAction(id, direction)
-    if (result.success) refresh()
+    if (!result.success) {
+      setCategories(currentList)
+    } else {
+      await load()
+    }
+    setMoving(null)
   }
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -96,7 +111,8 @@ export default function AdminCategoriesPage() {
     }
     setShowForm(false)
     setEditing(null)
-    refresh()
+    await load()
+    setSaving(false)
   }
 
   const handleAutoSlug = (name: string) => {
@@ -265,7 +281,7 @@ export default function AdminCategoriesPage() {
                         <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => handleMove(cat.id, "up")}
-                            disabled={index === 0}
+                            disabled={index === 0 || moving !== null}
                             className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 disabled:opacity-30 disabled:pointer-events-none"
                             title="Move up"
                           >
@@ -273,7 +289,7 @@ export default function AdminCategoriesPage() {
                           </button>
                           <button
                             onClick={() => handleMove(cat.id, "down")}
-                            disabled={index === categories.length - 1}
+                            disabled={index === categories.length - 1 || moving !== null}
                             className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 disabled:opacity-30 disabled:pointer-events-none"
                             title="Move down"
                           >
@@ -330,8 +346,8 @@ export default function AdminCategoriesPage() {
                   <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
                     <span className="text-xs text-muted-foreground">Order: {cat.sortOrder}</span>
                     <div className="flex gap-1.5">
-                      <button onClick={() => handleMove(cat.id, "up")} disabled={index === 0} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 border border-border/50 disabled:opacity-30 disabled:pointer-events-none" title="Move up"><ArrowUp className="w-4 h-4" /></button>
-                      <button onClick={() => handleMove(cat.id, "down")} disabled={index === categories.length - 1} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 border border-border/50 disabled:opacity-30 disabled:pointer-events-none" title="Move down"><ArrowDown className="w-4 h-4" /></button>
+                      <button onClick={() => handleMove(cat.id, "up")} disabled={index === 0 || moving !== null} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 border border-border/50 disabled:opacity-30 disabled:pointer-events-none" title="Move up"><ArrowUp className="w-4 h-4" /></button>
+                      <button onClick={() => handleMove(cat.id, "down")} disabled={index === categories.length - 1 || moving !== null} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 border border-border/50 disabled:opacity-30 disabled:pointer-events-none" title="Move down"><ArrowDown className="w-4 h-4" /></button>
                       <button onClick={() => { setEditing(cat); setShowForm(true) }} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-zinc-800 active:scale-90 transition-all duration-200 border border-border/50"><Pencil className="w-4 h-4" /></button>
                       <button onClick={() => handleDelete(cat.id)} disabled={deleting === cat.id} className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-muted-foreground hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all duration-200 border border-border/50 disabled:opacity-50"><Trash2 className="w-4 h-4" /></button>
                     </div>

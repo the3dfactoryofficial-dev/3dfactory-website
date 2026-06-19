@@ -6,12 +6,29 @@ import Link from "next/link"
 import { MessageCircle, Sparkles, Clock } from "lucide-react"
 import type { Product } from "@/types"
 import { Card } from "@/components/ui/Card"
-import { cn } from "@/lib/utils"
+import { cn, generateWhatsAppProductMessage, getWhatsAppUrl } from "@/lib/utils"
+import { SITE } from "@/lib/constants"
+import { siteUrl } from "@/lib/url"
+import { trackWhatsAppClick } from "@/lib/analytics"
 import { optimizeImage, getBlurBackgroundStyle } from "@/lib/cloudinary-utils"
 import { QuickInquiry } from "./QuickInquiry"
 
 export function ProductCard({ product, categoryLabel }: { product: Product; categoryLabel?: string }) {
   const [showInquiry, setShowInquiry] = useState(false)
+
+  const handleWhatsAppClick = () => {
+    const productUrl = siteUrl(`/catalog/${product.slug}`)
+    const message = generateWhatsAppProductMessage({
+      productName: product.title,
+      priceRange: product.priceRange,
+      categoryName: categoryLabel,
+      productImage: product.featuredImage,
+      productUrl,
+    })
+    const url = getWhatsAppUrl(SITE.whatsapp, message)
+    window.open(url, "_blank")
+    trackWhatsAppClick("product_card", product.id, product.title)
+  }
 
   return (
     <>
@@ -74,9 +91,9 @@ export function ProductCard({ product, categoryLabel }: { product: Product; cate
             <span>3–5 day turnaround</span>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-border">
+          <div className="mt-3 pt-3 border-t border-border space-y-2">
             <button
-              onClick={() => setShowInquiry(true)}
+              onClick={handleWhatsAppClick}
               className={cn(
                 "inline-flex items-center justify-center gap-2 w-full h-10 text-sm font-medium rounded-lg",
                 "bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-[0.97]",
@@ -84,7 +101,17 @@ export function ProductCard({ product, categoryLabel }: { product: Product; cate
               )}
             >
               <MessageCircle className="w-4 h-4" />
-              <span>Inquire Now</span>
+              <span>Order Now</span>
+            </button>
+            <button
+              onClick={() => setShowInquiry(true)}
+              className={cn(
+                "inline-flex items-center justify-center gap-2 w-full h-9 text-xs font-medium rounded-lg",
+                "bg-zinc-800 text-muted-foreground hover:text-foreground border border-border",
+                "transition-colors duration-150 cursor-pointer"
+              )}
+            >
+              Request Custom Quote
             </button>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { track } from "@vercel/analytics"
 
-export function trackWhatsAppClick(source: string) {
-  track("whatsapp_click", { source })
+export function trackWhatsAppClick(source: string, productId?: string, productName?: string) {
+  track("whatsapp_click", { source, productId, productName })
 }
 
 export function trackInquirySubmit(source: string) {

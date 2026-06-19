@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useCallback, useState, useEffect, memo } from "react"
+import { useMemo, useCallback, useState, useEffect, useRef, memo } from "react"
 import { useRouter } from "next/navigation"
 import { Package, MessageCircle } from "lucide-react"
 import { ProductCard } from "@/components/catalog/ProductCard"
@@ -21,9 +21,12 @@ export const CatalogClient = memo(function CatalogClient({
   const router = useRouter()
   const [activeCategory, setActiveCategory] = useState<string | null>(initialCategory)
   const [slugMap, setSlugMap] = useState<Record<string, string>>({})
+  const mountedRef = useRef(true)
 
   useEffect(() => {
+    mountedRef.current = true
     getActiveCategoriesAction().then((result) => {
+      if (!mountedRef.current) return
       if (result.success) {
         const map: Record<string, string> = {}
         for (const c of result.data) {
@@ -32,6 +35,7 @@ export const CatalogClient = memo(function CatalogClient({
         setSlugMap(map)
       }
     })
+    return () => { mountedRef.current = false }
   }, [])
 
   useEffect(() => {

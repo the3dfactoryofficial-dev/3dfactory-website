@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useState, useRef, useEffect, useCallback, startTransition } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { X, Upload, Loader2, ChevronDown, ChevronRight, ImageIcon, Video, Settings, DollarSign, CheckCircle2, AlertCircle, FileImage, CloudUpload } from "lucide-react"
 import {
   createProductAction,

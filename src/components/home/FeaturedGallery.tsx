@@ -3,11 +3,15 @@
 import { useRef, useState, useEffect, useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react"
 import { getActiveCategoriesAction } from "@/actions/categories"
 import type { Product } from "@/types"
-import { cn } from "@/lib/utils"
+import { cn, generateWhatsAppProductMessage, getWhatsAppUrl } from "@/lib/utils"
+import { SITE } from "@/lib/constants"
+import { siteUrl } from "@/lib/url"
+import { trackWhatsAppClick } from "@/lib/analytics"
 import { optimizeImage } from "@/lib/cloudinary-utils"
+import { QuickInquiry } from "@/components/catalog/QuickInquiry"
 
 const AUTOPLAY_INTERVAL = 4500
 const RESUME_DELAY = 5000
@@ -27,12 +31,30 @@ export function FeaturedGallery({ products }: { products: Product[] }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [slugMap, setSlugMap] = useState<Record<string, string>>({})
+  const [inquiryProduct, setInquiryProduct] = useState<Product | null>(null)
+  const mountedRef = useRef(true)
+
+  const handleWhatsAppClick = (product: Product) => {
+    const productUrl = siteUrl(`/catalog/${product.slug}`)
+    const message = generateWhatsAppProductMessage({
+      productName: product.title,
+      priceRange: product.priceRange,
+      categoryName: slugMap[product.category] ?? product.category,
+      productImage: product.featuredImage,
+      productUrl,
+    })
+    const url = getWhatsAppUrl(SITE.whatsapp, message)
+    window.open(url, "_blank")
+    trackWhatsAppClick("featured_gallery", product.id, product.title)
+  }
   const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isVisible = useRef(true)
   const reduceMotion = useRef(false)
 
   useEffect(() => {
+    mountedRef.current = true
     getActiveCategoriesAction().then((result) => {
+      if (!mountedRef.current) return
       if (result.success) {
         const map: Record<string, string> = {}
         for (const c of result.data) {
@@ -41,6 +63,7 @@ export function FeaturedGallery({ products }: { products: Product[] }) {
         setSlugMap(map)
       }
     })
+    return () => { mountedRef.current = false }
   }, [])
 
   useEffect(() => {
@@ -202,20 +225,41 @@ export function FeaturedGallery({ products }: { products: Product[] }) {
                 <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-primary/20 pointer-events-none" />
               )}
 
-              <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
-                <h3 className="text-lg md:text-xl font-bold text-white drop-shadow-sm">
+              <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
+                <h3 className="text-base md:text-lg font-bold text-white drop-shadow-sm">
                   {product.title}
                 </h3>
                 {product.shortDescription && (
-                  <p className="mt-1.5 text-sm text-white/70 line-clamp-2 leading-relaxed">
+                  <p className="mt-1 text-xs md:text-sm text-white/70 line-clamp-1 leading-relaxed">
                     {product.shortDescription}
                   </p>
                 )}
                 {product.priceRange && (
-                  <p className="mt-2 text-sm font-medium text-amber-400">
+                  <p className="mt-1 text-xs md:text-sm font-medium text-amber-400">
                     From {product.priceRange}
                   </p>
                 )}
+                <div className="mt-2 flex gap-1.5" onClick={(e) => e.preventDefault()}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleWhatsAppClick(product)
+                    }}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 h-8 text-[11px] font-medium rounded-md bg-[#25D366] text-white hover:bg-[#20BD5A] active:scale-[0.97] transition-all cursor-pointer"
+                  >
+                    <MessageCircle className="w-3 h-3" />
+                    <span>Order Now</span>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setInquiryProduct(product)
+                    }}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 h-8 text-[11px] font-medium rounded-md bg-white/15 text-white hover:bg-white/25 active:scale-[0.97] backdrop-blur-sm transition-all cursor-pointer"
+                  >
+                    Custom Quote
+                  </button>
+                </div>
               </div>
             </Link>
           </div>
@@ -258,6 +302,16 @@ export function FeaturedGallery({ products }: { products: Product[] }) {
             ))}
           </div>
         </>
+      )}
+
+      {inquiryProduct && (
+        <QuickInquiry
+          productName={inquiryProduct.title}
+          productCategory={slugMap[inquiryProduct.category] ?? inquiryProduct.category}
+          sourcePage={inquiryProduct.slug}
+          source="featured_gallery"
+          onClose={() => setInquiryProduct(null)}
+        />
       )}
     </div>
   )

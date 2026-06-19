@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import Image from "next/image"
 import {
   X,
@@ -35,9 +35,12 @@ export function ProductGallery({ product, onClose }: ProductGalleryProps) {
 
   const [slugMap, setSlugMap] = useState<Record<string, string>>({})
   const [showInquiry, setShowInquiry] = useState(false)
+  const mountedRef = useRef(true)
 
   useEffect(() => {
+    mountedRef.current = true
     getActiveCategoriesAction().then((result) => {
+      if (!mountedRef.current) return
       if (result.success) {
         const map: Record<string, string> = {}
         for (const c of result.data) {
@@ -46,6 +49,7 @@ export function ProductGallery({ product, onClose }: ProductGalleryProps) {
         setSlugMap(map)
       }
     })
+    return () => { mountedRef.current = false }
   }, [])
 
   const categoryLabel = slugMap[product.category] ?? product.category

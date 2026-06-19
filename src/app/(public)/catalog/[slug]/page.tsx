@@ -225,15 +225,18 @@ export default async function ProductPage({
                   </p>
                 )}
 
-                <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                <div className="mt-8">
                   <ProductPageCTA
+                    productId={product.id}
                     productName={product.title}
                     productSlug={slug}
                     categoryLabel={product.category.replace("-", " ")}
+                    featuredImage={product.featuredImage}
+                    priceRange={product.priceRange}
                   />
                   <a
                     href={`/catalog?category=${product.category}`}
-                    className="inline-flex items-center justify-center gap-2 h-13 px-8 text-base font-medium rounded-xl bg-zinc-800 text-foreground hover:bg-zinc-700 active:scale-[0.97] border border-border transition-all duration-200"
+                    className="mt-3 inline-flex items-center justify-center gap-2 h-13 px-8 text-base font-medium rounded-xl bg-zinc-800 text-foreground hover:bg-zinc-700 active:scale-[0.97] border border-border transition-all duration-200"
                   >
                     View Similar
                   </a>

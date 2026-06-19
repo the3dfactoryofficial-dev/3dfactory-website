@@ -34,7 +34,7 @@ const fadeUp = {
 
 export function Hero() {
   return (
-    <section className="relative min-h-dvh md:min-h-[calc(100vh-72px)] flex items-center overflow-hidden">
+    <section className="relative min-h-dvh md:h-[calc(100vh-64px)] flex items-center overflow-hidden">
       <div
         className="absolute inset-0 pointer-events-none z-0 overflow-hidden bg-background"
         aria-hidden="true"
@@ -55,7 +55,7 @@ export function Hero() {
       </div>
 
       <motion.div
-        className="container-main w-full relative z-10 pt-24 pb-16 md:pt-20 md:pb-12"
+        className="container-main w-full relative z-10 pt-24 pb-16 md:pt-20 md:pb-8"
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
@@ -122,7 +122,7 @@ export function Hero() {
 
           <motion.div
             variants={fadeUp}
-            className="mt-12 md:mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8"
+            className="mt-10 md:mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8"
           >
             {stats.map((stat) => (
               <div

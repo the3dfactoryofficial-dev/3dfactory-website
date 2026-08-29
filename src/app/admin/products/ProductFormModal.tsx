@@ -200,6 +200,7 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [categories, setCategories] = useState<CategoryRow[]>([])
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
 
   const [featuredImage, setFeaturedImage] = useState(product?.featuredImage ?? "")
   const [galleryImages, setGalleryImages] = useState<string[]>(product?.galleryImages ?? [])
@@ -218,15 +219,21 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
     basic: true,
     media: true,
     videos: false,
-    pricing: false,
+    pricing: true,
     publishing: false,
   })
 
   useEffect(() => {
+    mountedRef.current = true
     lockBodyScroll()
     const uploads = activeUploads.current
+    setCategoriesLoading(true)
     getCategoriesAction().then((result) => {
       if (result.success) setCategories(result.data)
+    }).catch(() => {
+      // keep categories empty but allow form to continue
+    }).finally(() => {
+      if (mountedRef.current) setCategoriesLoading(false)
     })
     if (product) {
       getProductVideosAction(product.id).then((result) => {
@@ -269,7 +276,12 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
       : await createProductAction(formData)
 
     if (!result.success) {
-      setError(result.error ?? "Failed to save product")
+      const msg = result.error ?? "Failed to save product"
+      setError(msg)
+      // Auto-expand pricing if category error was hidden
+      if (msg.toLowerCase().includes("category")) {
+        setSections((prev) => ({ ...prev, pricing: true }))
+      }
       setSaving(false)
       return
     }
@@ -442,11 +454,12 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
 
   const isUploading =
     featuredUpload.state === "preparing" || featuredUpload.state === "uploading" ||
-    Object.values(galleryUploads).some((u) => u.state === "preparing" || u.state === "uploading")
+    Object.values(galleryUploads).some((u) => u.state === "preparing" || u.state === "uploading") ||
+    Object.values(videoUploads).some((u) => u.state === "preparing" || u.state === "uploading")
 
   const videosPending = isEdit && !videosLoaded
 
-  const canSave = !saving && !isUploading && !videosPending
+  const canSave = !saving && !isUploading && !videosPending && !categoriesLoading
 
   const toggleSection = (key: keyof typeof sections) => {
     setSections((prev) => ({ ...prev, [key]: !prev[key] }))
@@ -686,12 +699,16 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   <div>
                     <label htmlFor="categoryId" className={labelClass}>Category *</label>
-                    <select id="categoryId" name="categoryId" required defaultValue={product?.categoryId ?? categories.find((c) => c.slug === product?.category)?.id ?? ""} className={selectClass}>
-                      {categories.length === 0 && <option value="">Loading...</option>}
+                    <select id="categoryId" name="categoryId" required defaultValue={product?.categoryId ?? categories.find((c) => c.slug === product?.category)?.id ?? ""} className={selectClass} disabled={categoriesLoading}>
+                      {categoriesLoading && <option value="">Loading categories...</option>}
+                      {!categoriesLoading && categories.length === 0 && <option value="">No categories — create one first</option>}
                       {categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                       ))}
                     </select>
+                    {!categoriesLoading && categories.length === 0 && (
+                      <p className="text-[11px] text-amber-400 mt-1">No active categories found. Create a category in Admin → Categories first.</p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="priceRange" className={labelClass}>Price Range</label>
@@ -788,10 +805,10 @@ export function ProductFormModal({ product, onClose }: ProductFormModalProps) {
               disabled={!canSave}
               className="h-11 sm:h-10 px-5 text-sm font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary-hover active:scale-[0.97] transition-all duration-200 disabled:opacity-50 inline-flex items-center gap-2"
             >
-              {(saving || isUploading || videosPending) && (
+              {(saving || isUploading || videosPending || categoriesLoading) && (
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               )}
-              {videosPending ? "Loading..." : isEdit ? "Update Product" : "Create Product"}
+              {categoriesLoading ? "Loading categories..." : videosPending ? "Loading..." : isUploading ? "Uploading..." : isEdit ? "Update Product" : "Create Product"}
             </button>
           </div>
         </form>

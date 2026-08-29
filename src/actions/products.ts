@@ -92,10 +92,12 @@ export async function createProductAction(
 
     return result
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to create product"
     if (err && typeof err === "object" && "issues" in err) {
-      return { success: false, error: `Validation error: ${message}` }
+      const issues = (err as unknown as { issues: { message: string; path: (string|number)[] }[] }).issues
+      const detail = issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ") || (err as unknown as Error).message
+      return { success: false, error: detail }
     }
+    const message = err instanceof Error ? err.message : "Failed to create product"
     return { success: false, error: message }
   }
 }
@@ -151,10 +153,12 @@ export async function updateProductAction(
     }
     return result
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to update product"
     if (err && typeof err === "object" && "issues" in err) {
-      return { success: false, error: `Validation error: ${message}` }
+      const issues = (err as unknown as { issues: { message: string; path: (string|number)[] }[] }).issues
+      const detail = issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ") || (err as unknown as Error).message
+      return { success: false, error: detail }
     }
+    const message = err instanceof Error ? err.message : "Failed to update product"
     return { success: false, error: message }
   }
 }
